@@ -1,0 +1,12 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "제도인식엔진",
+      "runtimeExecutable": "python3",
+      "runtimeArgs": ["-m", "http.server", "8765", "--directory", "/Users/ybr/제도인식엔진"],
+      "port": 8765,
+      "url": "http://localhost:8765"
+    }
+  ]
+}

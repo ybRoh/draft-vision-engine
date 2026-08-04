@@ -603,12 +603,28 @@ function 시작() {
   T = { scale: 기본T.scale, dx: 기본T.dx, dy: 기본T.dy, rot: 0 };
   wrap.style.opacity = 0.7;
 
-  기본view = Math.min(1, (vp.clientWidth - 24) / natW, (vp.clientHeight - 24) / natH);
+  /* 사진이 다 보이게 첫 화면 배율을 잡는다.
+   * clientWidth/Height 가 아직 0 이면(레이아웃 전) 음수가 나와 슬라이더 최소값(10%)에 눌린다 —
+   * 그래서 아래 시작 시점을 레이아웃 뒤로 미루고, 여기서도 한 번 더 바닥을 깐다. */
+  var 여유 = 24;
+  var fw = vp.clientWidth > 여유 ? (vp.clientWidth - 여유) / natW : 1;
+  var fh = vp.clientHeight > 여유 ? (vp.clientHeight - 여유) / natH : 1;
+  기본view = Math.max(0.1, Math.min(1, fw, fh));
   적용();
   화면배율(기본view);
 }
-if (photo.complete && photo.naturalWidth) 시작();
-else photo.addEventListener('load', 시작);
+/* data URI 사진은 complete 가 곧바로 참이라 여기서 바로 부르면 **CSS 레이아웃 전에** 돈다.
+ * 그러면 vp.clientWidth/Height 가 0 이라 첫 배율이 엉뚱하게 잡힌다.
+ * requestAnimationFrame 으로 한 프레임 미뤄 레이아웃이 끝난 뒤에 잰다. */
+function 레이아웃뒤(f) { requestAnimationFrame(function () { requestAnimationFrame(f); }); }
+if (photo.complete && photo.naturalWidth) 레이아웃뒤(시작);
+else photo.addEventListener('load', function () { 레이아웃뒤(시작); });
+// 창 크기가 바뀌어도 사람이 맞춰 둔 도면 변환(T)은 건드리지 않는다 — 화면 배율만 다시 잡는다
+addEventListener('resize', function () {
+  if (!natW) return;
+  var fw = (vp.clientWidth - 24) / natW, fh = (vp.clientHeight - 24) / natH;
+  기본view = Math.max(0.1, Math.min(1, fw, fh));
+});
 })();
 </script>
 </body>
