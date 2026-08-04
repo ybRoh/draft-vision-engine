@@ -8,8 +8,8 @@
  */
 import fs from 'node:fs';
 import path from 'node:path';
-import { validate } from '../lib/validate.mjs';
-import { resolve, DraftError } from '../lib/draft.mjs';
+import { DraftError } from '../lib/draft.mjs';
+import { loadDraft } from '../lib/project.mjs';
 import { ExprError } from '../lib/expr.mjs';
 import { toSVG } from '../lib/svg.mjs';
 import { toDXF } from '../lib/dxf.mjs';
@@ -81,26 +81,12 @@ for (const s of opts.set ?? []) {
   overrides[k] = v;
 }
 
-let spec;
+/* loadDraft 가 파일을 읽고 검사하고, refs 를 따라 다른 조각까지 풀어 준다.
+ * 소매처럼 몸판 암홀 길이를 받아야 하는 조각은 이 경로로만 열린다. */
+let drawing, svg, dxf, deps = [];
 try {
-  spec = JSON.parse(fs.readFileSync(file, 'utf8'));
-} catch (e) {
-  console.error(`✖ ${file} 을 읽지 못했다 — ${e.message}`);
-  process.exit(1);
-}
-
-const errs = validate(spec);
-if (errs.length) {
-  console.error(`✖ DSL 오류 ${errs.length}건 — ${file}`);
-  for (const e of errs) console.error('  ' + e);
-  process.exit(1);
-}
-
-// 제도·출력에서 나는 오류는 사용자가 고칠 수 있는 것(식·치수)이라 스택 대신 한 줄로 낸다.
-// 그 밖의 예외는 우리 쪽 버그이므로 스택이 보이도록 그대로 둔다.
-let drawing, svg, dxf;
-try {
-  drawing = resolve(spec, overrides);
+  const r = loadDraft(file, overrides);
+  drawing = r.drawing; deps = r.deps;
   svg = toSVG(drawing, { points: !flag('no-points') });
   dxf = toDXF(drawing, { labels: flag('labels'), title: !flag('no-title') });
 } catch (e) {
@@ -115,8 +101,11 @@ const base = opt('out') ?? path.join('out', path.basename(file).replace(/\.draft
 fs.mkdirSync(path.dirname(base), { recursive: true });
 fs.writeFileSync(base + '.svg', svg);
 fs.writeFileSync(base + '.dxf', dxf);
+if (deps.length) {
+  console.log(`  참조: ${deps.map((d) => path.relative(process.cwd(), d)).join(' · ')}`);
+}
 
-const w = drawing.bbox.x1 - drawing.bbox.x0, h = drawing.bbox.y1 - drawing.bbox.y0;
+const w = drawing.cutBbox.x1 - drawing.cutBbox.x0, h = drawing.cutBbox.y1 - drawing.cutBbox.y0;
 console.log(`✔ ${drawing.name}`);
 console.log(`  치수 ${Object.entries(drawing.measures).map(([k, v]) => `${k}=${v}`).join(' ')}`);
 console.log(`  점 ${Object.keys(drawing.points).length} · 선 ${drawing.segments.length} · 다트 ${drawing.darts.length} · 너치 ${drawing.notches.length}`);

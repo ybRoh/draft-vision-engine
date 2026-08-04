@@ -1,0 +1,65 @@
+{
+  "version": 1,
+  "name": "문화식 셋인 반소매 (데모)",
+  "source": {
+    "book": "데모 — 교재 전사본이 아님",
+    "page": "미상"
+  },
+  "units": "cm",
+  "measures": [
+    { "id": "SLEEVE_LEN", "desc": "소매길이 (정점에서 소맷부리까지)", "value": 22 }
+  ],
+  "params": [
+    { "id": "CAP_H", "desc": "소매산 높이. 0 이면 자동(AH/3.2). 낮출수록 소매통이 넓어져 팔이 편하다", "value": 0 },
+    { "id": "SLV_EASE", "desc": "소매산 이세 총량. 활동적 아이템은 0", "value": 0 },
+    { "id": "TAPER", "desc": "소맷부리를 겨드랑 폭에서 좁히는 양(한쪽)", "value": 1 }
+  ],
+  "refs": [
+    { "id": "FAH", "desc": "앞 암홀 길이 (앞판에서 실측)", "draft": "bunka-front.draft.json", "take": "segmentLength", "of": "armhole" },
+    { "id": "BAH", "desc": "뒤 암홀 길이 (뒤판에서 실측)", "draft": "bunka-back.draft.json", "take": "segmentLength", "of": "armhole" }
+  ],
+  "points": [
+    { "id": "APEX", "desc": "소매산 정점 (제도 원점)", "kind": "xy", "x": 0, "y": 0 },
+    { "id": "HEM_M", "desc": "소맷부리 중심 (소매 중심선 아래끝)", "kind": "xy", "x": 0, "y": "SLEEVE_LEN" },
+    { "id": "HEM_F", "desc": "소맷부리 앞끝", "kind": "xy", "x": "CAP_F.x-TAPER", "y": "SLEEVE_LEN" },
+    { "id": "HEM_B", "desc": "소맷부리 뒤끝", "kind": "xy", "x": "CAP_B.x+TAPER", "y": "SLEEVE_LEN" }
+  ],
+  "segments": [
+    {
+      "id": "cap",
+      "desc": "소매산 — 앞뒤 암홀 길이에서 폭을 역산",
+      "kind": "sleevecap",
+      "layer": "cut",
+      "apex": "APEX",
+      "frontAH": "FAH",
+      "backAH": "BAH",
+      "capHeight": "CAP_H",
+      "ease": "SLV_EASE",
+      "produces": {
+        "front": "CAP_F",
+        "back": "CAP_B",
+        "notchFront": "CAP_NF",
+        "notchBack": "CAP_NB"
+      }
+    },
+    { "id": "biceps", "desc": "소매통선 (겨드랑 수평선)", "kind": "line", "layer": "guide", "pts": ["CAP_B", "CAP_F"], "closed": false },
+    { "id": "grain", "desc": "소매 중심선 (식서)", "kind": "line", "layer": "construction", "pts": ["APEX", "HEM_M"], "closed": false },
+    { "id": "underarm_f", "desc": "앞 소매 옆선", "kind": "line", "layer": "cut", "pts": ["CAP_F", "HEM_F"], "closed": false },
+    { "id": "underarm_b", "desc": "뒤 소매 옆선", "kind": "line", "layer": "cut", "pts": ["CAP_B", "HEM_B"], "closed": false },
+    { "id": "hem", "desc": "소맷부리", "kind": "line", "layer": "cut", "pts": ["HEM_B", "HEM_F"], "closed": false }
+  ],
+  "darts": [],
+  "notches": [
+    { "id": "n_apex", "desc": "소매산 정점 (어깨선과 맞춤)", "at": "APEX" },
+    { "id": "n_front", "desc": "앞 소매산 합인 (앞 암홀 너치와 맞춤)", "at": "CAP_NF" },
+    { "id": "n_back", "desc": "뒤 소매산 합인 (뒤 암홀 너치와 맞춤)", "at": "CAP_NB" }
+  ],
+  "notes": [
+    "데모용이다. 교재 전사본이 아니라 앞/뒤판 예제에 맞물리도록 만든 소매다.",
+    "소매산 폭은 주지 않는다 — 곡선 길이가 앞뒤 암홀 합 + 이세와 같아지도록 이분탐색으로 역산한다. 이게 소매가 몸판에 붙는 이유 전부다.",
+    "앞뒤 암홀 길이는 refs 로 몸판 파일에서 실측해 온다. B 를 바꾸면 몸판 암홀이 커지고 소매가 따라 커진다.",
+    "소매산 제도점은 문화식 AH 분할 — 상부 볼록 AH/8, 겨드랑 오목(합인) 앞 AH/8 · 뒤 AH/12+0.6.",
+    "SLV_EASE 를 0 으로 둔 것은 활동적 아이템 기준이다. 일반 블라우스는 2 안팎을 넣는다.",
+    "소맷부리는 직선이다. 실제 교재는 살짝 곡선으로 뜨는 경우가 많다."
+  ]
+}

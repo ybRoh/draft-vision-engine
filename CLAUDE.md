@@ -15,7 +15,8 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 - **`expr.mjs`** — 계산식 평가기. 토크나이저 → Pratt 파서 → 순수 계산. `evalExpr(식, scope)` · `deps(식)`. 함수 표는 `FN`(이름 → `[인자 수, 함수]`), 문서·검증용 이름 목록은 `FUNCS`. 교재 OCR 표기(`×` `÷` `−` 전각 괄호…)를 `normalize` 로 흡수하고, 인자 수·정의역·토큰 2000개·괄호 100겹을 검사한다
 - **`schema.mjs`** — DSL(`draft-spec v1`) 정의 한 곳. `extract` 의 structured output 스키마이자 `validate` 의 검사 대상. `LAYER_LIST` 도 여기서 나간다
 - **`draft.mjs`** — 엔진의 심장. DSL → 좌표. 점 위상정렬 · `resolve(spec, overrides)` · `DraftError`
-- **`curve.mjs`** — Freesewing(Brian block) through 곡선 · **제도법 곡선 `fsNeck`·`fsArmhole`** · 베지어 길이(`segsLen`) · 폴리라인 길이(`polyLen`) · 직선 교점(`lineIntersect`). 벡터 헬퍼 `V`
+- **`project.mjs`** — `loadDraft(파일, 덮어쓰기)`. refs 를 따라 다른 조각까지 읽고 풀어 준다. 파일 IO 는 전부 여기 (resolve 는 순수 함수로 둔다)
+- **`curve.mjs`** — Freesewing(Brian block) through 곡선 · **제도법 곡선 `fsNeck`·`fsArmhole`·`bunkaSleeveCap`** · 베지어 길이(`segsLen`) · 폴리라인 길이(`polyLen`) · 직선 교점(`lineIntersect`). 벡터 헬퍼 `V`
 - **`svg.mjs`** — 도형 → SVG. cm 좌표 그대로 + `viewBox`, 1cm 모눈, 5cm 자
 - **`dxf.mjs`** — 도형 → DXF R12. `toDXF(drawing, {scale, textHeight, labels, title})` · 검증용 되읽기 `parseDXF` · 논리 레이어 → DXF 레이어 이름표 `DXF_LAYER` · `hasNonAscii`
 - **`validate.mjs`** — 구조(스키마) + 의미(참조 무결성 · **계산식**) 검사. 오류 문자열 배열을 돌려준다
@@ -26,6 +27,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 - **`extract.mjs`** — 이미지 → DSL (Claude Vision). `--name` `--hint` `--effort low|medium|high|xhigh|max`(기본 `xhigh`). 인증은 `ANTHROPIC_API_KEY` 또는 `ant auth login`
 - **`overlay.mjs`** — 도면을 원본 사진 위에 얹어 배율·이동·회전을 맞춰 보는 단일 HTML 을 만든다(외부 의존 0, 사진은 data URI). `--out` `--set`. 2점 배율 맞추기 · 레이어 토글 · 변환값 JSON 복사
 - **`verify_expr.mjs`** — 식 평가기 (우선순위·결합 · `-2^2 = -4` · OCR 표기 · 인자 수 · 정의역 · 프로토타입 이름 · eval 이 아님)
+- **`verify_sleeve.mjs`** — 조각 간 참조 + 소매산 (곡선 길이=암홀+이세 항등식 · 합인 제도점 위치 · S자 오목/볼록 깊이 · 그레이딩 전파 · 참조 고리·오타)
 - **`verify_draft.mjs`** — DSL 해석 (손계산 대조 · 곡선 길이·중간점 고정 · **목선·암홀의 어깨선 직각 · 암홀 오목 · 좌우반전 대칭** · 잘못된 DSL 걷어내기 · 참조 고리 · 평행선)
 - **`verify_grade.mjs`** — 그레이딩 (44~88호 단조 증가 · 폭 증가가 `B/4` 와 맞는지 · 앞뒤 암홀 합)
 - **`verify_dxf.mjs`** — DXF 가 CAD 에서 열리는 것 (형식 · 테이블 · LTYPE 40=|49| 합 · 엔티티 수 · ENTITIES 의 VERTEX 만 골라 배율·y 뒤집기 · `$EXTMIN/$EXTMAX` · 값 개행)
@@ -55,6 +57,11 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 - **DXF 레이어 이름은 대문자다.** DSL 의 `layer`(소문자 `cut`·`guide`·`fold`·`dart`·`construction`) → DXF `CUT`·`GUIDE`·`FOLD`·`DART`·`CONSTRUCTION`, 그리고 `NOTCH`·`TEXT`. 매핑은 `dxf.mjs` 의 `DXF_LAYER` 하나뿐이니 이름을 바꿀 일이 있으면 거기서만 바꾸고 `verify_dxf` 가 `DXF_LAYER` 를 통해 보게 둘 것 (R12 리더 중 레이어 이름을 대문자로 정규화하는 것이 있어 처음부터 대문자로 쓴다)
 - **DXF 제목에 한글이 들어가면 구형 CAM 에서 깨진다** — `STANDARD` 폰트(`txt.shx`)에 한글 글리프가 없다. 탈출구는 `toDXF(d, { title: false })` — CLI 로는 `render.mjs --no-title` 이다. 끄더라도 이름은 999 주석에 남는다
 - **조각의 실제 크기는 `cutBbox` 다** (`cut`·`fold` 선 + 다트 + 너치). `bbox` 는 보조점까지 감싼 액자용이라 치수를 따라 자라지 않는다 — 그레이딩 검증·용지 배치는 `cutBbox` 를 볼 것
+- **소매산 폭은 이분탐색으로 역산한다** (`bunkaSleeveCap`) — 곡선 길이 = 앞뒤 암홀 합 + 이세. 폭을 먼저 정하는 코드로 바꾸면 소매가 몸판에 안 붙는다. `/Users/ybr/pattern-Pro/반소매블라우스원형-문화식FS.html` 의 검증된 구현이다
+- **선도 점을 만들 수 있다** (`SEG_PRODUCES`) — 역산 결과는 식으로 못 쓰기 때문이다. 그래서 `resolve()` 는 점과 선을 **한 그래프에** 넣고 위상정렬한다. 점 먼저 · 선 나중 구조로 되돌리면 소매를 못 그린다
+- **조각 참조 고리 검사는 메모 확인보다 먼저** (`lib/project.mjs` `readAll`) — 순서를 바꾸면 뒤엣변이 통과해 스택오버플로로 죽는다
+- **`URL.pathname` 을 파일 경로로 쓰지 말 것** — 리포 경로에 한글이 있어 퍼센트 인코딩된다. `fileURLToPath()` 를 쓴다 (예전에 few-shot 을 통째로 무력화한 함정)
+- **construction 레이어는 화면 액자(`viewBbox`)를 넓히지 못한다** — 보조선은 교점을 잡으려고 아무 데나 길게 긋는 것이라, 액자에 넣으면 정작 조각이 작아진다
 - **목선·암홀은 `fsNeck`·`fsArmhole` 로만 그린다** — `~/.claude/skills/pattern-draft-app/references/engine.js` 의 검증된 구현을 옮긴 것이다. 기존 패턴 앱들과 같은 곡선이 나와야 하므로 **핸들 수식을 임의로 다듬지 말 것.** 고칠 일이 생기면 스킬 쪽과 같이 고친다
 - **목선은 옆목점에, 암홀은 어깨끝점에 어깨선과 직각으로 닿아야 한다** — 어깨를 박았을 때 목둘레·진동에 각이 지지 않게 하는 조건이다. `verify_draft` 가 실제로 잰다. through 곡선으로 대체하면 이 조건이 깨진다
 - **암홀 겨드랑 쪽은 오목해야 한다** — 오목점이 현 바깥으로 나가면 단순 볼록 돔이 되어 팔이 안 올라간다. 이것도 검증이 잡는다

@@ -10,8 +10,7 @@
  */
 import fs from 'node:fs';
 import path from 'node:path';
-import { validate } from '../lib/validate.mjs';
-import { resolve } from '../lib/draft.mjs';
+import { loadDraft } from '../lib/project.mjs';
 import { toSVG } from '../lib/svg.mjs';
 
 const 사용법 = [
@@ -93,21 +92,9 @@ catch (e) {
 if (!imgBuf.length) { console.error(`✖ 원본 이미지가 빈 파일이다: ${imgFile}`); process.exit(2); }
 
 // ── DSL → 도형 → SVG
-let spec;
-try { spec = JSON.parse(fs.readFileSync(file, 'utf8')); }
-catch (e) {
-  console.error(`✖ draft.json 을 읽지 못했다: ${file}`);
-  console.error('  ' + e.message);
-  process.exit(2);
-}
-const errs = validate(spec);
-if (errs.length) {
-  console.error(`✖ DSL 오류 ${errs.length}건 — ${file}`);
-  for (const e of errs) console.error('  ' + e);
-  process.exit(1);
-}
+
 let drawing;
-try { drawing = resolve(spec, overrides); }
+try { drawing = loadDraft(file, overrides).drawing; }
 catch (e) {
   console.error(`✖ 도면을 못 풀었다 — ${file}`);
   console.error('  ' + e.message);
