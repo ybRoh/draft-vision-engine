@@ -1,0 +1,360 @@
+{
+  "version": 1,
+  "name": "무다트 민소매 오버블라우스 뒤판 (scan025)",
+  "source": {
+    "book": "무다트 원형 참조 (교재 도해 전사)",
+    "page": "미상"
+  },
+  "units": "cm",
+  "measures": [
+    {
+      "id": "B",
+      "desc": "가슴둘레",
+      "value": 86
+    },
+    {
+      "id": "W",
+      "desc": "허리둘레",
+      "value": 68
+    },
+    {
+      "id": "H",
+      "desc": "엉덩이둘레",
+      "value": 92
+    },
+    {
+      "id": "BACK_LEN",
+      "desc": "등길이 (옆목 수평선 → 허리선)",
+      "value": 38
+    },
+    {
+      "id": "HIP_LEN",
+      "desc": "엉덩이길이 — 도해 19",
+      "value": 19
+    },
+    {
+      "id": "BLOUSE_LEN",
+      "desc": "블라우스 길이 — 도해 58.4",
+      "value": 58.4
+    }
+  ],
+  "params": [
+    {
+      "id": "NW",
+      "desc": "목너비 — 도해 6.6",
+      "value": 6.6
+    },
+    {
+      "id": "NECK_UP",
+      "desc": "뒤 옆목 올림 — 도해 1",
+      "value": 1
+    },
+    {
+      "id": "BND",
+      "desc": "뒤목깊이 (목너비/3). 도해에 수치가 안 보여 통상값",
+      "value": 2.2
+    },
+    {
+      "id": "FACING_W",
+      "desc": "뒤 안단 깊이 — 도해 5.4",
+      "value": 5.4
+    },
+    {
+      "id": "SH_W",
+      "desc": "어깨끈 너비 — 도해 4",
+      "value": 4
+    },
+    {
+      "id": "SH_ANGLE",
+      "desc": "어깨 경사(도). 도해에 각도 표기가 없어 추정",
+      "value": 16
+    },
+    {
+      "id": "AH_IN",
+      "desc": "진동 파는 양 — 앞판 2.5 에 맞춤",
+      "value": 2.5
+    },
+    {
+      "id": "UA_UP",
+      "desc": "겨드랑 올림(민소매) — 앞판과 같게",
+      "value": 2.8
+    },
+    {
+      "id": "BUST_EASE",
+      "desc": "뒤 가슴 여유분 — 도해 1.9",
+      "value": 1.9
+    },
+    {
+      "id": "WAIST_EASE",
+      "desc": "허리 여유분 — 도해 2.5",
+      "value": 2.5
+    },
+    {
+      "id": "HIP_EASE",
+      "desc": "엉덩이 여유분 — 도해 1",
+      "value": 1
+    }
+  ],
+  "refs": [],
+  "points": [
+    {
+      "id": "A",
+      "desc": "뒤중심 × 옆목 수평선 (제도 원점)",
+      "kind": "xy",
+      "x": 0,
+      "y": 0
+    },
+    {
+      "id": "SNP",
+      "desc": "뒤 옆목점 (목너비만큼 나가 1 올림)",
+      "kind": "xy",
+      "x": "NW",
+      "y": "-NECK_UP"
+    },
+    {
+      "id": "SP",
+      "desc": "어깨끝점 (어깨끈 4)",
+      "kind": "polar",
+      "from": "SNP",
+      "angle": "-SH_ANGLE",
+      "dist": "SH_W"
+    },
+    {
+      "id": "CNP",
+      "desc": "뒤목점 (옆목점보다 뒤목깊이만큼 아래)",
+      "kind": "xy",
+      "x": 0,
+      "y": "BND-NECK_UP"
+    },
+    {
+      "id": "BL_C",
+      "desc": "뒤중심 × 진동깊이선 (B/4)",
+      "kind": "xy",
+      "x": 0,
+      "y": "B/4"
+    },
+    {
+      "id": "BL_S",
+      "desc": "가슴선 옆끝 (B/4+여유분 1.9)",
+      "kind": "xy",
+      "x": "B/4+BUST_EASE",
+      "y": "B/4"
+    },
+    {
+      "id": "UA",
+      "desc": "겨드랑점 — 민소매라 진동 밑을 올린다",
+      "kind": "xy",
+      "x": "B/4+BUST_EASE",
+      "y": "B/4-UA_UP"
+    },
+    {
+      "id": "AH_P",
+      "desc": "뒤품점 — 진동을 2.5 파 들어간 자리 (암홀은 x 만 쓴다)",
+      "kind": "xy",
+      "x": "B/4+BUST_EASE-AH_IN",
+      "y": "B/8"
+    },
+    {
+      "id": "WL_C",
+      "desc": "뒤중심 허리점",
+      "kind": "xy",
+      "x": 0,
+      "y": "BACK_LEN"
+    },
+    {
+      "id": "WL_S",
+      "desc": "옆선 허리점 (W/4+여유분 2.5)",
+      "kind": "xy",
+      "x": "W/4+WAIST_EASE",
+      "y": "BACK_LEN"
+    },
+    {
+      "id": "HL_C",
+      "desc": "뒤중심 엉덩이점",
+      "kind": "xy",
+      "x": 0,
+      "y": "BACK_LEN+HIP_LEN"
+    },
+    {
+      "id": "HL_S",
+      "desc": "옆선 엉덩이점 (H/4+여유분 1)",
+      "kind": "xy",
+      "x": "H/4+HIP_EASE",
+      "y": "BACK_LEN+HIP_LEN"
+    },
+    {
+      "id": "HEM_S",
+      "desc": "옆선 밑단",
+      "kind": "xy",
+      "x": "H/4+HIP_EASE",
+      "y": "BLOUSE_LEN"
+    },
+    {
+      "id": "HEM_C",
+      "desc": "뒤중심 밑단",
+      "kind": "xy",
+      "x": 0,
+      "y": "BLOUSE_LEN"
+    },
+    {
+      "id": "FAC_C",
+      "desc": "뒤중심 안단선 (뒤목점에서 5.4 아래)",
+      "kind": "xy",
+      "x": 0,
+      "y": "BND-NECK_UP+FACING_W"
+    },
+    {
+      "id": "FAC_SH",
+      "desc": "어깨 위 안단선 끝",
+      "kind": "on",
+      "a": "SNP",
+      "b": "SP",
+      "t": 0.5
+    },
+    {
+      "id": "FAC_M",
+      "desc": "안단선 통과점",
+      "kind": "xy",
+      "x": "NW*0.85",
+      "y": "(BND-NECK_UP+FACING_W)*0.45"
+    }
+  ],
+  "segments": [
+    {
+      "id": "bust_line",
+      "desc": "진동깊이선 (B/4)",
+      "kind": "line",
+      "layer": "guide",
+      "pts": [
+        "BL_C",
+        "BL_S"
+      ],
+      "closed": false
+    },
+    {
+      "id": "waist_line",
+      "desc": "허리선",
+      "kind": "line",
+      "layer": "guide",
+      "pts": [
+        "WL_C",
+        "WL_S"
+      ],
+      "closed": false
+    },
+    {
+      "id": "hip_line",
+      "desc": "엉덩이선",
+      "kind": "line",
+      "layer": "guide",
+      "pts": [
+        "HL_C",
+        "HL_S"
+      ],
+      "closed": false
+    },
+    {
+      "id": "top_line",
+      "desc": "옆목 수평선 (제도 기준선)",
+      "kind": "line",
+      "layer": "guide",
+      "pts": [
+        "A",
+        "BL_S"
+      ],
+      "closed": false
+    },
+    {
+      "id": "neck",
+      "desc": "뒤목선",
+      "kind": "neck",
+      "layer": "cut",
+      "center": "CNP",
+      "snp": "SNP",
+      "shoulder": "SP"
+    },
+    {
+      "id": "shoulder",
+      "desc": "어깨선 (어깨끈 4)",
+      "kind": "line",
+      "layer": "cut",
+      "pts": [
+        "SNP",
+        "SP"
+      ],
+      "closed": false
+    },
+    {
+      "id": "armhole",
+      "desc": "뒤 진동 (민소매)",
+      "kind": "armhole",
+      "layer": "cut",
+      "shoulder": "SP",
+      "neck": "SNP",
+      "pitch": "AH_P",
+      "bottom": "UA"
+    },
+    {
+      "id": "cb",
+      "desc": "뒤중심 (골)",
+      "kind": "line",
+      "layer": "fold",
+      "pts": [
+        "CNP",
+        "HEM_C"
+      ],
+      "closed": false
+    },
+    {
+      "id": "side",
+      "desc": "옆선 (허리에서 들어갔다 엉덩이로 나감)",
+      "kind": "curve",
+      "layer": "cut",
+      "through": [
+        "UA",
+        "WL_S",
+        "HL_S",
+        "HEM_S"
+      ],
+      "tension": 0.36
+    },
+    {
+      "id": "hem",
+      "desc": "밑단",
+      "kind": "line",
+      "layer": "cut",
+      "pts": [
+        "HEM_C",
+        "HEM_S"
+      ],
+      "closed": false
+    },
+    {
+      "id": "facing",
+      "desc": "안단선",
+      "kind": "curve",
+      "layer": "guide",
+      "through": [
+        "FAC_C",
+        "FAC_M",
+        "FAC_SH"
+      ],
+      "tension": 0.45
+    }
+  ],
+  "darts": [],
+  "notches": [
+    {
+      "id": "n_waist",
+      "desc": "옆선 허리 너치",
+      "at": "WL_S"
+    }
+  ],
+  "notes": [
+    "교재 도해(무다트 원형 참조, 뒷면)를 전사한 것이다. 도해에서 직접 읽은 값: 목너비 6.6 · 뒤 옆목 올림 1 · 안단 5.4 · 어깨끈 4 · 가슴 B/4+1.9 · 허리 W/4+2.5 · 엉덩이 H/4+1 · 엉덩이길이 19 · 블라우스길이 58.4.",
+    "추정한 값: 뒤목깊이 2.2(목너비/3 통상값 — 도해에서 수치를 못 읽었다), 어깨 경사 16도, 겨드랑 올림 2.8, 뒤품점 높이 B/8.",
+    "앞판과 맞물려야 하는 값(겨드랑 올림·진동 파는 양)은 앞판과 같게 두었다. 실제 교재는 앞뒤가 다를 수 있다.",
+    "밑단은 직선이다. 앞판만 앞내림분 1 이 있다.",
+    "안단선은 guide 레이어의 자유 곡선이다 — 진짜 오프셋이 아니다."
+  ]
+}

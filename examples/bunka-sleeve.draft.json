@@ -1,65 +1,204 @@
 {
   "version": 1,
-  "name": "문화식 셋인 반소매 (데모)",
+  "name": "반소매 원형 (교재 「반소매 원형」 제도법)",
   "source": {
-    "book": "데모 — 교재 전사본이 아님",
+    "book": "반소매 원형 (교재 도해 전사)",
     "page": "미상"
   },
   "units": "cm",
   "measures": [
-    { "id": "SLEEVE_LEN", "desc": "소매길이 (정점에서 소맷부리까지)", "value": 22 }
+    {
+      "id": "SLEEVE_LEN",
+      "desc": "소매길이 (정점에서 소맷부리까지)",
+      "value": 22
+    }
   ],
   "params": [
-    { "id": "CAP_H", "desc": "소매산 높이. 0 이면 자동(AH/3.2). 낮출수록 소매통이 넓어져 팔이 편하다", "value": 0 },
-    { "id": "SLV_EASE", "desc": "소매산 이세 총량. 활동적 아이템은 0", "value": 0 },
-    { "id": "TAPER", "desc": "소맷부리를 겨드랑 폭에서 좁히는 양(한쪽)", "value": 1 }
+    {
+      "id": "CAP_H",
+      "desc": "소매산 높이. 0 이면 자동 AH/4+2 (도해)",
+      "value": 0
+    },
+    {
+      "id": "F_RED",
+      "desc": "앞 대각선에서 뺄 값 — 도해 \"앞AH − 0~1\"",
+      "value": 1
+    },
+    {
+      "id": "B_RED",
+      "desc": "뒤 대각선에서 뺄 값 — 도해 \"뒤AH − 0~1\"",
+      "value": 1
+    },
+    {
+      "id": "F_RISE",
+      "desc": "앞 소매산 AH/8 지점 볼록량 — 도해 1.8",
+      "value": 1.8
+    },
+    {
+      "id": "B_RISE",
+      "desc": "뒤 소매산 AH/8 지점 볼록량 — 도해 1.9",
+      "value": 1.9
+    },
+    {
+      "id": "TAPER",
+      "desc": "소맷부리를 겨드랑 폭에서 좁히는 양(한쪽) — 도해 1.5",
+      "value": 1.5
+    },
+    {
+      "id": "HEM_DROP",
+      "desc": "소맷부리 내림 — 도해 0.5",
+      "value": 0.5
+    }
   ],
   "refs": [
-    { "id": "FAH", "desc": "앞 암홀 길이 (앞판에서 실측)", "draft": "bunka-front.draft.json", "take": "segmentLength", "of": "armhole" },
-    { "id": "BAH", "desc": "뒤 암홀 길이 (뒤판에서 실측)", "draft": "bunka-back.draft.json", "take": "segmentLength", "of": "armhole" }
+    {
+      "id": "FAH",
+      "desc": "앞 암홀 길이 (앞판에서 실측)",
+      "draft": "bunka-front.draft.json",
+      "take": "segmentLength",
+      "of": "armhole"
+    },
+    {
+      "id": "BAH",
+      "desc": "뒤 암홀 길이 (뒤판에서 실측)",
+      "draft": "bunka-back.draft.json",
+      "take": "segmentLength",
+      "of": "armhole"
+    }
   ],
   "points": [
-    { "id": "APEX", "desc": "소매산 정점 (제도 원점)", "kind": "xy", "x": 0, "y": 0 },
-    { "id": "HEM_M", "desc": "소맷부리 중심 (소매 중심선 아래끝)", "kind": "xy", "x": 0, "y": "SLEEVE_LEN" },
-    { "id": "HEM_F", "desc": "소맷부리 앞끝", "kind": "xy", "x": "CAP_F.x-TAPER", "y": "SLEEVE_LEN" },
-    { "id": "HEM_B", "desc": "소맷부리 뒤끝", "kind": "xy", "x": "CAP_B.x+TAPER", "y": "SLEEVE_LEN" }
+    {
+      "id": "APEX",
+      "desc": "소매산 정점 (제도 원점)",
+      "kind": "xy",
+      "x": 0,
+      "y": 0
+    },
+    {
+      "id": "HEM_M",
+      "desc": "소맷부리 중심 (소매 중심선 아래끝)",
+      "kind": "xy",
+      "x": 0,
+      "y": "SLEEVE_LEN"
+    },
+    {
+      "id": "HEM_F",
+      "desc": "소맷부리 앞끝",
+      "kind": "xy",
+      "x": "CAP_F.x-TAPER",
+      "y": "SLEEVE_LEN+HEM_DROP"
+    },
+    {
+      "id": "HEM_B",
+      "desc": "소맷부리 뒤끝",
+      "kind": "xy",
+      "x": "CAP_B.x+TAPER",
+      "y": "SLEEVE_LEN+HEM_DROP"
+    }
   ],
   "segments": [
     {
       "id": "cap",
-      "desc": "소매산 — 앞뒤 암홀 길이에서 폭을 역산",
+      "desc": "소매산 — 대각선 길이 = 앞AH−1 / 뒤AH−1 (도해 제도1)",
       "kind": "sleevecap",
       "layer": "cut",
       "apex": "APEX",
       "frontAH": "FAH",
       "backAH": "BAH",
       "capHeight": "CAP_H",
-      "ease": "SLV_EASE",
       "produces": {
         "front": "CAP_F",
         "back": "CAP_B",
         "notchFront": "CAP_NF",
         "notchBack": "CAP_NB"
-      }
+      },
+      "frontReduce": "F_RED",
+      "backReduce": "B_RED",
+      "frontRise": "F_RISE",
+      "backRise": "B_RISE"
     },
-    { "id": "biceps", "desc": "소매통선 (겨드랑 수평선)", "kind": "line", "layer": "guide", "pts": ["CAP_B", "CAP_F"], "closed": false },
-    { "id": "grain", "desc": "소매 중심선 (식서)", "kind": "line", "layer": "construction", "pts": ["APEX", "HEM_M"], "closed": false },
-    { "id": "underarm_f", "desc": "앞 소매 옆선", "kind": "line", "layer": "cut", "pts": ["CAP_F", "HEM_F"], "closed": false },
-    { "id": "underarm_b", "desc": "뒤 소매 옆선", "kind": "line", "layer": "cut", "pts": ["CAP_B", "HEM_B"], "closed": false },
-    { "id": "hem", "desc": "소맷부리", "kind": "line", "layer": "cut", "pts": ["HEM_B", "HEM_F"], "closed": false }
+    {
+      "id": "biceps",
+      "desc": "소매통선 (겨드랑 수평선)",
+      "kind": "line",
+      "layer": "guide",
+      "pts": [
+        "CAP_B",
+        "CAP_F"
+      ],
+      "closed": false
+    },
+    {
+      "id": "grain",
+      "desc": "소매 중심선 (식서)",
+      "kind": "line",
+      "layer": "construction",
+      "pts": [
+        "APEX",
+        "HEM_M"
+      ],
+      "closed": false
+    },
+    {
+      "id": "underarm_f",
+      "desc": "앞 소매 옆선",
+      "kind": "line",
+      "layer": "cut",
+      "pts": [
+        "CAP_F",
+        "HEM_F"
+      ],
+      "closed": false
+    },
+    {
+      "id": "underarm_b",
+      "desc": "뒤 소매 옆선",
+      "kind": "line",
+      "layer": "cut",
+      "pts": [
+        "CAP_B",
+        "HEM_B"
+      ],
+      "closed": false
+    },
+    {
+      "id": "hem",
+      "desc": "소맷부리",
+      "kind": "line",
+      "layer": "cut",
+      "pts": [
+        "HEM_B",
+        "HEM_F"
+      ],
+      "closed": false
+    }
   ],
   "darts": [],
   "notches": [
-    { "id": "n_apex", "desc": "소매산 정점 (어깨선과 맞춤)", "at": "APEX" },
-    { "id": "n_front", "desc": "앞 소매산 합인 (앞 암홀 너치와 맞춤)", "at": "CAP_NF" },
-    { "id": "n_back", "desc": "뒤 소매산 합인 (뒤 암홀 너치와 맞춤)", "at": "CAP_NB" }
+    {
+      "id": "n_apex",
+      "desc": "소매산 정점 (어깨선과 맞춤)",
+      "at": "APEX"
+    },
+    {
+      "id": "n_front",
+      "desc": "앞 소매산 합인 (앞 암홀 너치와 맞춤)",
+      "at": "CAP_NF"
+    },
+    {
+      "id": "n_back",
+      "desc": "뒤 소매산 합인 (뒤 암홀 너치와 맞춤)",
+      "at": "CAP_NB"
+    }
   ],
   "notes": [
-    "데모용이다. 교재 전사본이 아니라 앞/뒤판 예제에 맞물리도록 만든 소매다.",
-    "소매산 폭은 주지 않는다 — 곡선 길이가 앞뒤 암홀 합 + 이세와 같아지도록 이분탐색으로 역산한다. 이게 소매가 몸판에 붙는 이유 전부다.",
-    "앞뒤 암홀 길이는 refs 로 몸판 파일에서 실측해 온다. B 를 바꾸면 몸판 암홀이 커지고 소매가 따라 커진다.",
-    "소매산 제도점은 문화식 AH 분할 — 상부 볼록 AH/8, 겨드랑 오목(합인) 앞 AH/8 · 뒤 AH/12+0.6.",
-    "SLV_EASE 를 0 으로 둔 것은 활동적 아이템 기준이다. 일반 블라우스는 2 안팎을 넣는다.",
-    "소맷부리는 직선이다. 실제 교재는 살짝 곡선으로 뜨는 경우가 많다."
+    "교재 「반소매 원형」 도해(제도1·제도2)를 그대로 옮긴 제도법이다.",
+    "★ 폭을 곡선 길이로 역산하지 않는다. 소매산 높이 = AH/4+2, 앞 대각선 = 앞AH−(0~1), 뒤 대각선 = 뒤AH−(0~1). 정점에서 그 길이만큼 대각선을 그어 소매통선과 만나는 곳이 겨드랑 코너다.",
+    "이세는 결과로 나온다 — 곡선이 대각선(현)보다 길어진 만큼이고, 빼는 0~1 로 조절한다.",
+    "곡선 제도점은 도해 표기 그대로다. 정점에서 AH/8 지점을 현 위로(앞 1.8 · 뒤 1.9), 겨드랑에서 앞 AH/8 · 뒤 AH/12+0.6 지점을 현 아래로(합인 너치).",
+    "겨드랑 오목 깊이는 도해에 수치가 없어 현 길이 비례로 두었다(앞 5.5% · 뒤 3.0%).",
+    "도해의 0.3↓ 는 무엇인지 확정 못했다 — 앞 소매산 상부에 붙은 표기로 보이나 원본과 겹쳐 봐야 한다.",
+    "소맷부리는 1.5 씩 좁히고 0.5 내렸다(도해). 도해의 2등분 곡선(밑단 굴림)은 아직 직선이다.",
+    "앞뒤 암홀 길이는 refs 로 몸판 파일에서 실측해 온다."
   ]
 }

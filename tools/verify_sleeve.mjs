@@ -1,9 +1,10 @@
 #!/usr/bin/env node
-/* 조각 간 참조 + 소매산 검증.
+/* 조각 간 참조 + 소매산 검증 (교재 「반소매 원형」 제도법).
  *
- * 소매의 존재 이유는 하나다 — **소매산 곡선 길이 = 앞뒤 암홀 합 + 이세**.
- * 이게 안 맞으면 아무리 예쁘게 그려도 몸판에 안 붙는다. 그래서 그 항등식을
- * 사이즈·이세·산높이를 바꿔 가며 반복해서 잰다.
+ * 이 제도법의 정의는 **대각선(현)** 이다 — 앞 현 = 앞AH−(0~1), 뒤 현 = 뒤AH−(0~1),
+ * 소매산 높이 = AH/4+2. 폭은 그 삼각형으로 정해지고, **이세는 결과로 나온다.**
+ * (곡선 길이를 목표로 역산하는 다른 교재 방식과 혼동하지 말 것 — 그렇게 되돌리면
+ *  현 길이가 도해 값과 어긋난다.)
  */
 import fs from 'node:fs';
 import path from 'node:path';
@@ -36,14 +37,25 @@ const cap = (d) => d.segments.find((s) => s.id === 'cap');
   const c = cap(drawing);
   near(c.derived.AH, fah + bah, '소매가 받은 AH = 앞판+뒤판 암홀 실측', 1e-9);
 
-  /* ★ 핵심 항등식. 이분탐색이 폭을 제대로 역산했는가.
-   *   0.01cm 는 봉제에서 의미 없는 차이지만, 알고리즘이 깨지면 cm 단위로 벌어진다. */
-  near(c.length, fah + bah, '소매산 곡선 길이 = 앞뒤 암홀 합 (이세 0)', 0.01);
-  near(c.derived.ease, 0, '이세 0', 0.01);
+  /* ★ 이 제도법의 정의 — 대각선(현)이 도해 값과 같은가.
+   *   자로 재는 값이라 오차가 있으면 안 된다. */
+  near(c.derived.chordF, fah - 1, '앞 대각선 = 앞AH − 1 (도해)', 1e-9);
+  near(c.derived.chordB, bah - 1, '뒤 대각선 = 뒤AH − 1 (도해)', 1e-9);
+  near(c.derived.SC, (fah + bah) / 4 + 2, '소매산 높이 = AH/4 + 2 (도해)', 1e-9);
 
-  // 이세는 앞뒤 암홀 비율로 나뉜다 (이세 0 이면 각각 자기 암홀과 같아야 한다)
-  near(c.derived.lenF, fah, '앞 소매산 = 앞 암홀', 0.01);
-  near(c.derived.lenB, bah, '뒤 소매산 = 뒤 암홀', 0.01);
+  // 대각선·산높이·폭이 직각삼각형을 이룬다 (코너가 정말 그 대각선 끝인가)
+  for (const [쪽, 코너id, 현] of [['앞', 'CAP_F', c.derived.chordF], ['뒤', 'CAP_B', c.derived.chordB]]) {
+    const dx = drawing.points[코너id].x - drawing.points.APEX.x;
+    const dy = drawing.points[코너id].y - drawing.points.APEX.y;
+    near(Math.hypot(dx, dy), 현, `${쪽} 겨드랑 코너까지 실측 거리 = 대각선`, 1e-9);
+    near(dy, c.derived.SC, `${쪽} 코너가 소매통선(y=소매산높이) 위에 있다`, 1e-9);
+  }
+
+  /* 이세는 **결과**다. 도해가 0~1 을 빼라고 한 것은 이세를 이 범위로 떨어뜨리기 위해서다.
+   *   못 박지 않고 상식 범위만 본다 — 못 박으면 오목 깊이를 조금만 바꿔도 깨진다. */
+  if (!(c.derived.ease > -0.5 && c.derived.ease < 3)) {
+    bad(`이세가 상식 범위를 벗어났다: ${c.derived.ease.toFixed(2)}cm (기대 −0.5~3)`);
+  }
 
   // 정점이 실제로 꼭대기인가 (뒤집혀 그려지면 여기서 걸린다)
   const ys = c.pts.map((p) => p[1]);
@@ -100,11 +112,17 @@ const cap = (d) => d.segments.find((s) => s.id === 'cap');
   }
 }
 
-// ── 이세를 넣으면 정확히 그만큼 길어진다
-for (const e of [1, 2, 3.5]) {
-  const d = 열기({ SLV_EASE: e }).drawing;
-  const c = cap(d);
-  near(c.length - c.derived.AH, e, `이세 ${e} 를 넣으면 곡선이 그만큼 길어진다`, 0.02);
+/* ── 도해의 "0~1 을 뺀다" 가 이세 조절 레버로 작동하는가.
+ *   많이 뺄수록 현이 짧아지고 → 이세가 준다. 이 방향이 뒤집히면 제도법이 뒤집힌 것이다. */
+{
+  let 이전 = Infinity;
+  for (const r of [0, 0.5, 1]) {
+    const c = cap(열기({ F_RED: r, B_RED: r }).drawing);
+    near(c.derived.chordF, 열기().drawing.segments.find((x) => x.id === 'cap').derived.chordF + (1 - r),
+         `뺄값 ${r} 일 때 앞 대각선`, 1e-9);
+    if (!(c.derived.ease < 이전)) bad(`뺄값을 ${r} 로 키웠는데 이세가 안 줄었다 (${c.derived.ease.toFixed(2)})`);
+    이전 = c.derived.ease;
+  }
 }
 
 // ── 산 높이를 낮추면 소매통이 넓어진다 (활동성 레버)
@@ -112,24 +130,27 @@ for (const e of [1, 2, 3.5]) {
   const 낮게 = 열기({ CAP_H: 9 }).drawing, 높게 = 열기({ CAP_H: 14 }).drawing;
   const w = (d) => d.points.CAP_F.x - d.points.CAP_B.x;
   if (!(w(낮게) > w(높게))) bad(`산을 낮췄는데 소매통이 안 넓어졌다 (9cm→${w(낮게).toFixed(1)} · 14cm→${w(높게).toFixed(1)})`);
-  // 산 높이를 바꿔도 곡선 길이는 암홀에 묶여 있어야 한다
+  // 산 높이를 바꿔도 대각선은 도해 값(앞AH−1)에 묶여 있어야 한다
   for (const [이름, d] of [['9cm', 낮게], ['14cm', 높게]]) {
     const c = cap(d);
-    near(c.length, c.derived.AH, `산높이 ${이름} 에서도 곡선 길이 = 암홀`, 0.01);
+    near(c.derived.chordF, c.derived.AH * 0 + 열기().drawing.segments.find((x) => x.id === 'cap').derived.chordF,
+         `산높이 ${이름} 에서도 앞 대각선은 그대로`, 1e-9);
+    near(c.derived.SC, 이름 === '9cm' ? 9 : 14, `산높이 ${이름} 이 그대로 쓰인다`, 1e-9);
   }
 }
 
 /* ── 그레이딩: B 를 바꾸면 몸판 암홀이 커지고 소매가 **따라온다**.
  *   이게 조각 간 참조를 만든 이유다. 참조가 끊기면 소매만 제자리에 남는다. */
 {
-  console.log('  호수    AH     소매산   소매통   이세');
+  console.log('  호수    AH     산높이   소매통   곡선    이세');
   let 이전 = null;
   for (const [호, B] of [['44호', 78], ['55호', 82], ['66호', 86], ['77호', 92], ['88호', 98]]) {
     const d = 열기({ B }).drawing, c = cap(d);
     const 통 = d.points.CAP_F.x - d.points.CAP_B.x;
-    console.log(`  ${호}  ${c.derived.AH.toFixed(2).padStart(6)}  ${c.length.toFixed(2).padStart(6)}`
-      + `  ${통.toFixed(2).padStart(6)}  ${c.derived.ease.toFixed(3).padStart(6)}`);
-    near(c.length, c.derived.AH, `${호} 소매산 = 암홀`, 0.01);
+    console.log(`  ${호}  ${c.derived.AH.toFixed(2).padStart(6)}  ${c.derived.SC.toFixed(2).padStart(6)}`
+      + `  ${통.toFixed(2).padStart(6)}  ${c.length.toFixed(2).padStart(6)}  ${c.derived.ease.toFixed(2).padStart(6)}`);
+    near(c.derived.SC, c.derived.AH / 4 + 2, `${호} 소매산 높이 = AH/4+2`, 1e-9);
+    if (!(c.derived.ease > -0.5 && c.derived.ease < 3)) bad(`${호} 이세가 상식 범위 밖: ${c.derived.ease.toFixed(2)}`);
     if (이전) {
       if (!(c.derived.AH > 이전.ah)) bad(`${호}: B 를 키웠는데 암홀이 안 커졌다`);
       if (!(통 > 이전.통)) bad(`${호}: 암홀이 커졌는데 소매통이 안 커졌다 (참조가 끊겼나)`);
@@ -167,6 +188,9 @@ const 던져야 = (fn, needle, what) => {
 
   던져야(() => loadDraft(소매, { NOPE: 1 }), '어느 조각의', '없는 이름을 덮어씀');
   던져야(() => loadDraft(소매, { FAH: 20 }), '참조라 덮어쓸 수 없다', '참조값을 직접 덮어씀');
+
+  // 대각선이 소매산 높이보다 짧으면 삼각형이 안 된다 — 조용히 NaN 을 내보내면 안 된다
+  던져야(() => loadDraft(소매, { CAP_H: 40 }), '보다 짧다', '산높이가 대각선보다 큼');
 
   /* 참조 고리 — a 가 b 를, b 가 a 를 가리킨다. 막지 않으면 스택오버플로로 죽는다. */
   const 고리A = JSON.parse(JSON.stringify(원본));
