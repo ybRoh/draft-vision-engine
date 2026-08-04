@@ -1,0 +1,79 @@
+{
+  "version": 1,
+  "name": "문화식 계열 상의 원형 앞판 (데모)",
+  "source": { "book": "데모 픽스처 — 실제 교재 전사본이 아님", "page": "미상" },
+  "units": "cm",
+
+  "measures": [
+    { "id": "B",   "desc": "가슴둘레",   "value": 86 },
+    { "id": "WL",  "desc": "등길이",     "value": 38 },
+    { "id": "SW",  "desc": "어깨너비",   "value": 39 },
+    { "id": "BPL", "desc": "유장",       "value": 24 },
+    { "id": "BPS", "desc": "유폭",       "value": 18 }
+  ],
+  "params": [
+    { "id": "HALF_ADD",  "desc": "앞판 반폭 여유 (B/4 에 더함)", "value": 1 },
+    { "id": "AHD_ADD",   "desc": "진동깊이 상수 (B/6 에 더함)",  "value": 7 },
+    { "id": "NW_ADD",    "desc": "목너비 상수 (B/20 에 더함)",   "value": 2.9 },
+    { "id": "FND_ADD",   "desc": "앞목깊이 = 목너비 + 이 값",    "value": 1 },
+    { "id": "FW_ADD",    "desc": "앞품 상수 (B/6 에 더함)",      "value": 3 },
+    { "id": "SH_ANGLE",  "desc": "앞 어깨경사(도)",              "value": 22 },
+    { "id": "DART_W",    "desc": "허리다트 벌림",                "value": 2.5 }
+  ],
+
+  "points": [
+    { "id": "A", "desc": "앞중심 · 어깨 수평선 교차 (제도 원점)", "kind": "xy", "x": 0, "y": 0 },
+    { "id": "SIDE_T", "desc": "옆선 위끝", "kind": "offset", "from": "A", "dx": "B/4+HALF_ADD", "dy": 0 },
+    { "id": "CF_W", "desc": "앞중심 허리점", "kind": "offset", "from": "A", "dx": 0, "dy": "WL" },
+    { "id": "SIDE_W", "desc": "옆선 허리점", "kind": "offset", "from": "SIDE_T", "dx": 0, "dy": "WL" },
+    { "id": "CF_B", "desc": "앞중심 진동깊이선", "kind": "offset", "from": "A", "dx": 0, "dy": "B/6+AHD_ADD" },
+    { "id": "SIDE_B", "desc": "겨드랑점 (옆선 × 진동깊이선)", "kind": "offset", "from": "SIDE_T", "dx": 0, "dy": "B/6+AHD_ADD" },
+
+    { "id": "SNP", "desc": "앞 옆목점", "kind": "xy", "x": "B/20+NW_ADD", "y": 0 },
+    { "id": "FNP", "desc": "앞목점 (앞중심)", "kind": "offset", "from": "A", "dx": 0, "dy": "B/20+NW_ADD+FND_ADD" },
+    { "id": "NECK_M", "desc": "앞목선 현의 중점", "kind": "on", "a": "SNP", "b": "FNP", "t": 0.5 },
+    { "id": "NECK_C", "desc": "앞목 곡선 통과점 (중점을 모서리 쪽으로 밀어냄)", "kind": "offset", "from": "NECK_M", "dx": -0.6, "dy": -0.6 },
+
+    { "id": "SH_DIR", "desc": "어깨 경사 방향점 (제도 보조)", "kind": "polar", "from": "SNP", "angle": "-SH_ANGLE", "dist": 20 },
+    { "id": "SWL_T", "desc": "어깨너비선 위 (제도 보조)", "kind": "xy", "x": "SW/2", "y": -5 },
+    { "id": "SWL_B", "desc": "어깨너비선 아래 (제도 보조)", "kind": "xy", "x": "SW/2", "y": 20 },
+    { "id": "SP", "desc": "어깨끝점 (어깨선 × 어깨너비선)", "kind": "intersect", "a1": "SNP", "a2": "SH_DIR", "b1": "SWL_T", "b2": "SWL_B" },
+
+    { "id": "FW_T", "desc": "앞품선 위 (제도 보조)", "kind": "xy", "x": "B/6+FW_ADD", "y": -1 },
+    { "id": "FW_B", "desc": "앞품선 아래 (진동깊이선까지)", "kind": "xy", "x": "B/6+FW_ADD", "y": "B/6+AHD_ADD" },
+    { "id": "AH_M", "desc": "앞품점 — 암홀이 지나는 자리", "kind": "on", "a": "FW_T", "b": "FW_B", "t": 0.65 },
+    { "id": "SH_N", "desc": "어깨 합인 너치 자리", "kind": "on", "a": "SNP", "b": "SP", "t": 0.5 },
+
+    { "id": "BP", "desc": "가슴점", "kind": "xy", "x": "BPS/2", "y": "BPL" },
+    { "id": "D_C", "desc": "허리다트 중심 (BP 바로 아래 허리선)", "kind": "xy", "x": "BP.x", "y": "WL" },
+    { "id": "D1", "desc": "허리다트 왼쪽 다리", "kind": "offset", "from": "D_C", "dx": "-DART_W/2", "dy": 0 },
+    { "id": "D2", "desc": "허리다트 오른쪽 다리", "kind": "offset", "from": "D_C", "dx": "DART_W/2", "dy": 0 }
+  ],
+
+  "segments": [
+    { "id": "box", "desc": "제도 기초 사각형", "kind": "line", "layer": "guide", "pts": ["A", "SIDE_T", "SIDE_W", "CF_W"], "closed": true },
+    { "id": "bust_line", "desc": "진동깊이선(가슴선)", "kind": "line", "layer": "guide", "pts": ["CF_B", "SIDE_B"], "closed": false },
+    { "id": "fw_line", "desc": "앞품선", "kind": "line", "layer": "guide", "pts": ["FW_T", "FW_B"], "closed": false },
+    { "id": "sh_line", "desc": "어깨 경사 안내선", "kind": "line", "layer": "construction", "pts": ["SNP", "SH_DIR"], "closed": false },
+
+    { "id": "cf", "desc": "앞중심 골선", "kind": "line", "layer": "fold", "pts": ["FNP", "CF_W"], "closed": false },
+    { "id": "shoulder", "desc": "어깨선", "kind": "line", "layer": "cut", "pts": ["SNP", "SP"], "closed": false },
+    { "id": "side", "desc": "옆선", "kind": "line", "layer": "cut", "pts": ["SIDE_B", "SIDE_W"], "closed": false },
+    { "id": "waist", "desc": "허리선", "kind": "line", "layer": "cut", "pts": ["CF_W", "SIDE_W"], "closed": false },
+    { "id": "neck", "desc": "앞목선", "kind": "curve", "layer": "cut", "through": ["SNP", "NECK_C", "FNP"], "tension": 0.4 },
+    { "id": "armhole", "desc": "앞 암홀", "kind": "curve", "layer": "cut", "through": ["SP", "AH_M", "SIDE_B"], "tension": 0.42 }
+  ],
+
+  "darts": [
+    { "id": "waist_dart", "desc": "앞 허리다트", "apex": "BP", "leg1": "D1", "leg2": "D2" }
+  ],
+  "notches": [
+    { "id": "n_shoulder", "desc": "어깨 합인 너치", "at": "SH_N" }
+  ],
+
+  "notes": [
+    "데모용 픽스처다. 문화식 계열 계산식을 본떴을 뿐 특정 교재의 전사본이 아니다.",
+    "실제 교재 페이지는 tools/extract.mjs 로 뽑아 이 자리를 대체한다.",
+    "어깨끝은 어깨경사선과 어깨너비선(SW/2)의 교점으로 잡았다."
+  ]
+}

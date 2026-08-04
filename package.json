@@ -1,0 +1,17 @@
+{
+  "name": "draft-vision-engine",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "교재 제도 도면 이미지 → 계산식 기반 제도 사양(DSL) → 자동 제도 → SVG/DXF",
+  "scripts": {
+    "test": "node tools/verify_expr.mjs && node tools/verify_draft.mjs && node tools/verify_grade.mjs && node tools/verify_dxf.mjs",
+    "render": "node tools/render.mjs",
+    "extract": "node tools/extract.mjs",
+    "overlay": "node tools/overlay.mjs",
+    "demo": "node tools/render.mjs examples/bunka-front.draft.json && node tools/render.mjs examples/bunka-back.draft.json"
+  },
+  "dependencies": {
+    "@anthropic-ai/sdk": "^0.115.0"
+  }
+}
