@@ -3,6 +3,7 @@
 import fs from 'node:fs';
 import { validate } from '../lib/validate.mjs';
 import { resolve, DraftError } from '../lib/draft.mjs';
+import { fsArmhole } from '../lib/curve.mjs';
 
 let fail = 0;
 const bad = (m) => { console.error('✖ ' + m); fail++; };
@@ -46,12 +47,12 @@ near(ah.pts[ah.pts.length - 1][1], P.SIDE_B.y, '암홀 끝 = SIDE_B.y', 1e-9);
 /* 길이·중간점을 소수 이하까지 못 박는다.
  * "15 < 길이 < 25" 같은 밴드만 두면 tension 을 0.42→0.9 로 바꾸거나 곡선을 직선으로
  * 만들어도 통과한다 — 곡선 기하가 사실상 미검증 상태가 된다. */
-near(ah.length, 18.4829, '앞 암홀 길이', 0.002);
-near(d.segments.find((s) => s.id === 'neck').length, 11.0665, '앞 목선 길이', 0.002);
+near(ah.length, 19.4714, '앞 암홀 길이', 0.002);
+near(d.segments.find((s) => s.id === 'neck').length, 11.9247, '앞 목선 길이', 0.002);
 {
   const mid = ah.pts[Math.floor(ah.pts.length / 2)];
-  near(mid[0], 17.3333, '암홀 중간점 x', 0.002);
-  near(mid[1], 13.5167, '암홀 중간점 y', 0.002);
+  near(mid[0], 17.7052, '암홀 중간점 x', 0.002);
+  near(mid[1], 17.2680, '암홀 중간점 y', 0.002);
 }
 // ── closed:true 는 실제로 첫 점으로 돌아와야 한다
 {
@@ -59,6 +60,61 @@ near(d.segments.find((s) => s.id === 'neck').length, 11.0665, '앞 목선 길이
   if (box.pts.length !== 5) bad(`closed 사각형 정점이 ${box.pts.length}개 (기대 5)`);
   near(box.pts[0][0], box.pts[box.pts.length - 1][0], 'closed 사각형 x 가 닫힘', 1e-12);
   near(box.pts[0][1], box.pts[box.pts.length - 1][1], 'closed 사각형 y 가 닫힘', 1e-12);
+}
+
+/* ── 제도법 곡선(목선·암홀)의 규칙
+ *
+ * 길이 숫자만 못 박으면 "그 값이 나오게" 아무 곡선이나 맞춰 넣어도 통과한다.
+ * 아래는 교재 제도법 자체의 성질이라, 핸들 계산을 잘못 건드리면 반드시 깨진다. */
+{
+  const 단위 = (v) => { const l = Math.hypot(v[0], v[1]); return [v[0] / l, v[1] / l]; };
+  const 어깨 = 단위([d.points.SP.x - d.points.SNP.x, d.points.SP.y - d.points.SNP.y]);
+
+  // (1) 목선은 옆목점에 **어깨선과 직각**으로 도착해야 한다. 아니면 목선-어깨 이음매에 각이 진다
+  {
+    const nk = d.segments.find((s) => s.id === 'neck');
+    const g = nk.segs[nk.segs.length - 1];
+    const t = 단위([g.p1[0] - g.c2[0], g.p1[1] - g.c2[1]]);
+    near(t[0] * 어깨[0] + t[1] * 어깨[1], 0, '목선이 SNP 에서 어깨선과 직각', 1e-9);
+  }
+
+  // (2) 암홀도 어깨끝에서 **어깨선과 직각**으로 출발해야 한다
+  {
+    const g = ah.segs[0];
+    const t = 단위([g.c1[0] - g.p0[0], g.c1[1] - g.p0[1]]);
+    near(t[0] * 어깨[0] + t[1] * 어깨[1], 0, '암홀이 SP 에서 어깨선과 직각', 1e-9);
+  }
+
+  // (3) 암홀은 품점의 x 를 지나고, 높이는 어깨~겨드랑의 **중간**이다 (제도법이 정하는 값)
+  near(ah.derived.pitch[0], d.points.AH_M.x, '암홀 품점 x = AH_M.x', 1e-12);
+  near(ah.derived.pitch[1], (d.points.SP.y + d.points.SIDE_B.y) / 2, '암홀 품점 y = 어깨~겨드랑 중간', 1e-12);
+
+  /* (4) 겨드랑 쪽은 **오목**해야 한다 — 이게 진동이 파이는 이유다.
+   *     오목점이 현(품점→겨드랑) 바깥으로 나가면 단순 볼록 돔이 되어 팔이 안 올라간다. */
+  {
+    const [px, py] = ah.derived.pitch, [hx, hy] = ah.derived.hollow;
+    const ux = d.points.SIDE_B.x, uy = d.points.SIDE_B.y;
+    const cross = (ax, ay, bx, by) => ax * by - ay * bx;
+    const s1 = cross(ux - px, uy - py, hx - px, hy - py);        // 오목점이 현의 어느 쪽인가
+    const s2 = cross(ux - px, uy - py, 0, uy - py);              // 코너(품선×겨드랑선)는 어느 쪽인가
+    if (!(s1 * s2 > 0)) bad('암홀 겨드랑 쪽이 오목하지 않다 (오목점이 현 바깥으로 나갔다)');
+    if (!(Math.abs(s1) < Math.abs(s2))) bad('암홀 오목점이 코너보다 더 파였다');
+  }
+
+  /* (5) 좌우 대칭 — 앞판은 겨드랑이 품점 왼쪽에 오므로 내부에서 x 를 뒤집어 센다.
+   *     그 뒤집기가 틀리면 한쪽 암홀만 조용히 다른 모양이 된다. 거울상이 정확히 같은지 본다. */
+  {
+    const SH = [10, 0], NK = [2, 1], U = [18, 20], pX = 15;
+    const a = fsArmhole(SH, NK, pX, U);
+    const mx = (p) => [100 - p[0], p[1]];
+    const b = fsArmhole(mx(SH), mx(NK), 100 - pX, mx(U));
+    a.segs.forEach((g, i) => {
+      for (const k of ['p0', 'c1', 'c2', 'p1']) {
+        near(b.segs[i][k][0], 100 - g[k][0], `암홀 좌우반전 ${i}.${k}.x`, 1e-9);
+        near(b.segs[i][k][1], g[k][1], `암홀 좌우반전 ${i}.${k}.y`, 1e-9);
+      }
+    });
+  }
 }
 
 // ── 뒤어깨 늘림: hypot() 식이 실제로 SH_EASE 만큼 길게 만들었나
@@ -92,8 +148,12 @@ mustFail((s) => { s.darts[0].apex = 'GHOST'; }, "점 'GHOST'", '다트가 없는
 mustFail((s) => { s.segments.push(JSON.parse(JSON.stringify(s.segments[0]))); }, '겹친다', 'segment id 중복');
 mustFail((s) => { s.notches.push(JSON.parse(JSON.stringify(s.notches[0]))); }, '겹친다', 'notch id 중복');
 mustFail((s) => { s.points = []; s.segments = []; }, '점이 하나도 없다', '빈 도면');
-mustFail((s) => { s.segments.find((x) => x.kind === 'curve').tension = 1e9; }, '범위 밖', 'tension 폭주');
-mustFail((s) => { s.segments.find((x) => x.kind === 'curve').tension = -5; }, '범위 밖', '음수 tension');
+/* 목선·암홀이 전용 kind 로 바뀌어 픽스처에 자유곡선이 없다.
+ * 픽스처에서 찾지 말고 검사할 곡선을 직접 만들어 넣는다 — 그래야 예제 구성이 바뀌어도 안 죽는다. */
+const 자유곡선 = (t) => ({ id: 'tmp_curve', desc: '검사용', kind: 'curve', layer: 'cut',
+                            through: ['CF_W', 'SIDE_W'], tension: t });
+mustFail((s) => { s.segments.push(자유곡선(1e9)); }, '범위 밖', 'tension 폭주');
+mustFail((s) => { s.segments.push(자유곡선(-5)); }, '범위 밖', '음수 tension');
 mustFail((s) => { s.segments[1].pts = ['CF_B', 'CF_B']; }, '연달아 두 번', '같은 점을 두 번 이은 선');
 
 /* 계산식 검사 — 모델이 가장 자주 틀리는 자리다.
