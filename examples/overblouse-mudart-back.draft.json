@@ -126,7 +126,7 @@
       "a": "SNP",
       "b": "CNP",
       "label": "목너비/3",
-      "offset": -1.5,
+      "offset": 2.4,
       "axis": "y"
     },
     {
@@ -144,7 +144,7 @@
       "a": "SNP",
       "b": "SP",
       "label": "6.4",
-      "offset": 1.2,
+      "offset": 2.0,
       "axis": "both"
     },
     {
