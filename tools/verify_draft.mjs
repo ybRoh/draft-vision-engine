@@ -171,6 +171,43 @@ near(d.segments.find((s) => s.id === 'neck').length, 11.9247, '앞 목선 길이
   }
 }
 
+/* ── 치수선 (dims) — "모든 패턴에는 제도선과 치수 공식을 넣는다"
+ *
+ * 값만 적힌 도면은 나중에 "이 23.0 이 어디서 나왔나" 를 못 되짚는다. 그래서 label 에
+ * 교재 식을 그대로 넣고, 치수선은 **조각 안쪽**에 둔다(바깥이면 인쇄·네스팅에서 잘린다). */
+{
+  const 민 = resolve(JSON.parse(fs.readFileSync(new URL('../examples/scan025-front.draft.json', import.meta.url))));
+  if (!민.dims.length) bad('scan025 앞판에 치수선이 하나도 없다');
+
+  // 교재 값과 실제 제도 결과가 일치하는가 — 식을 잘못 옮기면 여기서 갈린다
+  const 기대 = { d_ahd: 21.5, d_bust: 23.0, d_waist: 19.5, d_hip: 24.0,
+                 d_hiplen: 19.0, d_len: 58.4, d_drop: 1.0, d_shw: 6.4, d_fnd: 86 / 12 + 0.3 };
+  for (const [id, want] of Object.entries(기대)) {
+    const d = 민.dims.find((x) => x.id === id);
+    if (!d) { bad(`치수선 '${id}' 가 없다`); continue; }
+    near(d.length, want, `치수선 ${id} (${d.label})`, 0.005);
+  }
+
+  /* ★ 치수선이 조각 안쪽에 있는가. 글자 자리까지 쳐서 완성선 바깥으로 나가면 안 된다.
+   *   바깥으로 빼면 A4 분할 인쇄·네스팅에서 잘려 나간다. */
+  const cb = 민.cutBbox, 여유 = 0.6;
+  for (const d of 민.dims) {
+    const L = Math.hypot(d.b[0] - d.a[0], d.b[1] - d.a[1]) || 1;
+    const nx = -(d.b[1] - d.a[1]) / L, ny = (d.b[0] - d.a[0]) / L;
+    for (const p of [d.a, d.b]) {
+      const x = p[0] + nx * d.offset, y = p[1] + ny * d.offset;
+      if (x < cb.x0 - 여유 || x > cb.x1 + 여유 || y < cb.y0 - 여유 || y > cb.y1 + 여유) {
+        bad(`치수선 '${d.id}'(${d.label})가 조각 바깥으로 나갔다 (${x.toFixed(1)}, ${y.toFixed(1)})`
+          + ` — 조각은 x ${cb.x0.toFixed(1)}~${cb.x1.toFixed(1)} · y ${cb.y0.toFixed(1)}~${cb.y1.toFixed(1)}`);
+        break;
+      }
+    }
+  }
+
+  // label 이 비면 값만 남아 쓸모가 없다
+  for (const d of 민.dims) if (!String(d.label).trim()) bad(`치수선 '${d.id}' 에 식(label)이 없다`);
+}
+
 // ── 뒤어깨 늘림: hypot() 식이 실제로 SH_EASE 만큼 길게 만들었나
 const db = resolve(back);
 const shBack = db.segments.find((s) => s.id === 'shoulder').length;

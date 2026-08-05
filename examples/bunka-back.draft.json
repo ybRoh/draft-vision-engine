@@ -56,6 +56,40 @@
     }
   ],
   "refs": [],
+  "dims": [
+    {
+      "id": "d_nw",
+      "desc": "목너비",
+      "a": "A",
+      "b": "SNP",
+      "label": "B/20+2.9",
+      "offset": 1.2
+    },
+    {
+      "id": "d_bnd",
+      "desc": "뒤목깊이",
+      "a": "A",
+      "b": "CNP",
+      "label": "목너비/3",
+      "offset": -1.5
+    },
+    {
+      "id": "d_ahd",
+      "desc": "진동깊이",
+      "a": "A",
+      "b": "CB_B",
+      "label": "B/6+7",
+      "offset": -3.2
+    },
+    {
+      "id": "d_bust",
+      "desc": "뒤 가슴 반폭",
+      "a": "CB_B",
+      "b": "SIDE_B",
+      "label": "B/4+1",
+      "offset": 2.0
+    }
+  ],
   "points": [
     {
       "id": "A",

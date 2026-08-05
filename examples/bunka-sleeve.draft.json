@@ -66,6 +66,32 @@
       "of": "armhole"
     }
   ],
+  "dims": [
+    {
+      "id": "d_sc",
+      "desc": "소매산 높이",
+      "a": "APEX",
+      "b": "HEM_M",
+      "label": "AH/4+2",
+      "offset": -1.8
+    },
+    {
+      "id": "d_biceps",
+      "desc": "소매통",
+      "a": "CAP_B",
+      "b": "CAP_F",
+      "label": "대각선 앞AH−1 / 뒤AH−1 로 정해짐",
+      "offset": 1.8
+    },
+    {
+      "id": "d_len",
+      "desc": "소매길이",
+      "a": "APEX",
+      "b": "HEM_M",
+      "label": "22",
+      "offset": 2.4
+    }
+  ],
   "points": [
     {
       "id": "APEX",
