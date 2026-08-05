@@ -37,7 +37,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 - `examples/` — 데모 픽스처 앞·뒤판 (아래 주의 참고), `examples/fewshot/` — 이미지 + 같은 이름 `.draft.json` 짝을 넣으면 `extract` 가 자동으로 실어 보낸다
 - `out/` — 렌더·추출 결과가 쌓이는 곳
 
-- **`web/index.html`** — 산출물을 브라우저로 훑는 페이지(손으로 쓴 것). `npm run page` 가 `out/` 으로 복사한다. `out/` 은 gitignore 라 거기 두면 지워질 때 같이 날아간다
+- **`index.html`** (리포 루트) — 산출물을 브라우저로 훑는 페이지(손으로 쓴 것). 경로가 `out/...` 라 **루트에 있어야** 한다. `out/` 안에 두면 gitignore 라 지워질 때 날아가고, 별도 폴더에 두면 상대경로가 깨진다 (둘 다 실제로 겪었다)
 
 ## 불변 규칙
 
