@@ -96,6 +96,15 @@
     }
   ],
   "refs": [],
+  "compare": [
+    {
+      "id": "block",
+      "desc": "문화식 상의 원형 뒤판과 비교",
+      "draft": "bunka-back.draft.json",
+      "dx": 0,
+      "dy": 0
+    }
+  ],
   "dims": [
     {
       "id": "d_nw",

@@ -4,6 +4,14 @@ import fs from 'node:fs';
 import { validate } from '../lib/validate.mjs';
 import { resolve, DraftError } from '../lib/draft.mjs';
 import { fsArmhole } from '../lib/curve.mjs';
+import { loadDraft } from '../lib/project.mjs';
+import { fileURLToPath } from 'node:url';
+
+/* scan025 는 compare(원형비교패턴)를 쓰므로 resolve() 로는 못 연다 — 다른 조각의 도형이
+ * 필요하기 때문이다. 파일을 따라가는 loadDraft 로 연다. URL.pathname 은 한글 경로에서
+ * 퍼센트 인코딩되므로 fileURLToPath 를 쓴다. */
+const 예제경로 = (n) => fileURLToPath(new URL(`../examples/${n}`, import.meta.url));
+const 스캔앞판 = () => loadDraft(예제경로('scan025-front.draft.json')).drawing;
 
 let fail = 0;
 const bad = (m) => { console.error('✖ ' + m); fail++; };
@@ -123,7 +131,7 @@ near(d.segments.find((s) => s.id === 'neck').length, 11.9247, '앞 목선 길이
  * 셋인은 어깨 쪽이 현 위로 볼록한 S자인데, 민소매가 그러면 좁은 어깨끈에서 진동이
  * 바깥으로 부풀어 못 쓴다. 그래서 "전 구간 오목" 을 실제로 잰다. */
 {
-  const 민 = resolve(JSON.parse(fs.readFileSync(new URL('../examples/scan025-front.draft.json', import.meta.url))));
+  const 민 = 스캔앞판();
   const ah = 민.segments.find((s) => s.id === 'armhole');
   if (ah.kind !== 'armhole_sleeveless') bad(`scan025 앞판 진동 kind 가 ${ah.kind} 다 (기대 armhole_sleeveless)`);
   const SP = [민.points.SP.x, 민.points.SP.y];
@@ -171,12 +179,45 @@ near(d.segments.find((s) => s.id === 'neck').length, 11.9247, '앞 목선 길이
   }
 }
 
+/* ── 원형비교패턴 (compare)
+ *
+ * 원형을 빨간 가는 선으로 겹쳐 응용 패턴이 어디가 달라졌는지 본다.
+ * **cutBbox 에는 들어가면 안 된다** — 이 조각의 크기가 아니기 때문이다. 들어가면
+ * 그레이딩 검증과 용지 배치가 남의 조각 크기를 따라간다. */
+{
+  const 민 = 스캔앞판();
+  if (!민.compares.length) bad('scan025 앞판에 원형비교패턴이 없다');
+  for (const c of 민.compares) {
+    if (!c.lines.length) bad(`비교패턴 '${c.id}' 에 선이 하나도 없다`);
+    for (const pts of c.lines) if (pts.length < 2) bad(`비교패턴 '${c.id}' 에 점 1개짜리 선이 있다`);
+  }
+
+  /* 비교패턴을 멀리 옮겨도 cutBbox 는 그대로여야 한다. 같은 자리에 두고 재면
+   * "안 들어갔다" 를 증명할 수 없다 — 원형이 응용 안에 쏙 들어가 있어서다. */
+  {
+    const 원본 = JSON.parse(fs.readFileSync(예제경로('scan025-front.draft.json'), 'utf8'));
+    const 옮김 = JSON.parse(JSON.stringify(원본));
+    옮김.compare[0].dx = 100;
+    const tmp = 예제경로('.__cmp_test.draft.json');
+    fs.writeFileSync(tmp, JSON.stringify(옮김));
+    try {
+      const d2 = loadDraft(tmp).drawing;
+      for (const k of ['x0', 'y0', 'x1', 'y1']) {
+        near(d2.cutBbox[k], 민.cutBbox[k], `비교패턴을 100cm 옮겨도 cutBbox.${k} 불변`, 1e-9);
+      }
+      if (!(d2.viewBbox.x1 > 민.viewBbox.x1 + 50)) {
+        bad('비교패턴을 옮겼는데 화면 액자(viewBbox)가 안 따라갔다 — 그러면 화면 밖으로 사라진다');
+      }
+    } finally { fs.rmSync(tmp, { force: true }); }
+  }
+}
+
 /* ── 치수선 (dims) — "모든 패턴에는 제도선과 치수 공식을 넣는다"
  *
  * 값만 적힌 도면은 나중에 "이 23.0 이 어디서 나왔나" 를 못 되짚는다. 그래서 label 에
  * 교재 식을 그대로 넣고, 치수선은 **조각 안쪽**에 둔다(바깥이면 인쇄·네스팅에서 잘린다). */
 {
-  const 민 = resolve(JSON.parse(fs.readFileSync(new URL('../examples/scan025-front.draft.json', import.meta.url))));
+  const 민 = 스캔앞판();
   if (!민.dims.length) bad('scan025 앞판에 치수선이 하나도 없다');
 
   // 교재 값과 실제 제도 결과가 일치하는가 — 식을 잘못 옮기면 여기서 갈린다

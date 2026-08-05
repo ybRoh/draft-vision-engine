@@ -101,6 +101,15 @@
     }
   ],
   "refs": [],
+  "compare": [
+    {
+      "id": "block",
+      "desc": "문화식 상의 원형 앞판과 비교 (교재 표제 '무다트 원형 참조')",
+      "draft": "bunka-front.draft.json",
+      "dx": 0,
+      "dy": 0
+    }
+  ],
   "dims": [
     {
       "id": "d_nw",
