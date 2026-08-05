@@ -7,57 +7,342 @@
   },
   "units": "cm",
   "measures": [
-    { "id": "B", "desc": "가슴둘레", "value": 86 },
-    { "id": "W", "desc": "허리둘레", "value": 68 },
-    { "id": "SW", "desc": "어깨너비", "value": 39 },
-    { "id": "BACK_LEN", "desc": "등길이 (옆목 수평선 → 허리선)", "value": 38 }
+    {
+      "id": "B",
+      "desc": "가슴둘레",
+      "value": 86
+    },
+    {
+      "id": "W",
+      "desc": "허리둘레",
+      "value": 68
+    },
+    {
+      "id": "SW",
+      "desc": "어깨너비",
+      "value": 39
+    },
+    {
+      "id": "BACK_LEN",
+      "desc": "등길이 (옆목 수평선 → 허리선)",
+      "value": 38
+    }
   ],
   "params": [
-    { "id": "NW", "desc": "목너비 — 6.6", "value": 6.6 },
-    { "id": "NECK_UP", "desc": "앞 옆목 올림 — 0.6", "value": 0.6 },
-    { "id": "FND_ADD", "desc": "앞목깊이 더하는 값 (B/12 + 0.3)", "value": 0.3 },
-    { "id": "SH_ANGLE", "desc": "어깨 경사(도)", "value": 18 },
-    { "id": "FW_ADD", "desc": "앞품선 더하는 값 (B/6 + 값)", "value": 3 },
-    { "id": "BUST_EASE", "desc": "앞 가슴 여유분 — 1.5", "value": 1.5 }
+    {
+      "id": "NW",
+      "desc": "목너비 — 6.6",
+      "value": 6.6
+    },
+    {
+      "id": "NECK_UP",
+      "desc": "앞 옆목 올림 — 0.6",
+      "value": 0.6
+    },
+    {
+      "id": "FND_ADD",
+      "desc": "앞목깊이 더하는 값 (B/12 + 0.3)",
+      "value": 0.3
+    },
+    {
+      "id": "SH_ANGLE",
+      "desc": "어깨 경사(도)",
+      "value": 18
+    },
+    {
+      "id": "FW_ADD",
+      "desc": "앞품선 더하는 값 (B/6 + 값)",
+      "value": 3
+    },
+    {
+      "id": "BUST_EASE",
+      "desc": "앞 가슴 여유분 — 1.5",
+      "value": 1.5
+    }
   ],
   "refs": [],
   "compare": [],
   "dims": [
-    { "id": "d_nw", "desc": "목너비", "a": "A", "b": "SNP", "label": "6.6", "offset": 1.2 },
-    { "id": "d_fnd", "desc": "앞목깊이", "a": "A", "b": "FNP", "label": "B/12+0.3", "offset": -1.5 },
-    { "id": "d_ahd", "desc": "진동깊이", "a": "A", "b": "BL_C", "label": "B/4", "offset": -3.4 },
-    { "id": "d_bust", "desc": "앞 가슴 반폭", "a": "BL_C", "b": "BL_S", "label": "B/4+여유분 1.5", "offset": 2.2 },
-    { "id": "d_len", "desc": "등길이", "a": "A", "b": "WL_C", "label": "등길이", "offset": -5.4 },
-    { "id": "d_sw", "desc": "어깨너비의 반", "a": "A", "b": "SP", "label": "어깨너비/2", "offset": 1.4 }
+    {
+      "id": "d_nw",
+      "desc": "목너비",
+      "a": "A",
+      "b": "SNP",
+      "label": "6.6",
+      "offset": 1.2,
+      "axis": "x"
+    },
+    {
+      "id": "d_fnd",
+      "desc": "앞목깊이",
+      "a": "A",
+      "b": "FNP",
+      "label": "B/12+0.3",
+      "offset": -1.5,
+      "axis": "y"
+    },
+    {
+      "id": "d_ahd",
+      "desc": "진동깊이",
+      "a": "A",
+      "b": "BL_C",
+      "label": "B/4",
+      "offset": -3.4,
+      "axis": "y"
+    },
+    {
+      "id": "d_bust",
+      "desc": "앞 가슴 반폭",
+      "a": "BL_C",
+      "b": "BL_S",
+      "label": "B/4+여유분 1.5",
+      "offset": 2.2,
+      "axis": "x"
+    },
+    {
+      "id": "d_len",
+      "desc": "등길이",
+      "a": "A",
+      "b": "WL_C",
+      "label": "등길이",
+      "offset": -5.4,
+      "axis": "y"
+    },
+    {
+      "id": "d_sw",
+      "desc": "어깨너비의 반",
+      "a": "A",
+      "b": "SP",
+      "label": "어깨너비/2",
+      "offset": 1.4,
+      "axis": "x"
+    }
   ],
   "points": [
-    { "id": "A", "desc": "앞중심 × 옆목 수평선 (제도 원점)", "kind": "xy", "x": 0, "y": 0 },
-    { "id": "SNP", "desc": "앞 옆목점", "kind": "xy", "x": "NW", "y": "-NECK_UP" },
-    { "id": "FNP", "desc": "앞목점 (B/12+0.3)", "kind": "xy", "x": 0, "y": "B/12+FND_ADD" },
-    { "id": "SH_DIR", "desc": "어깨 경사 방향점 (제도 보조)", "kind": "polar", "from": "SNP", "angle": "-SH_ANGLE", "dist": 20 },
-    { "id": "SWL_T", "desc": "어깨너비선 위 (제도 보조)", "kind": "xy", "x": "SW/2", "y": -1 },
-    { "id": "SWL_B", "desc": "어깨너비선 아래 (제도 보조)", "kind": "xy", "x": "SW/2", "y": 20 },
-    { "id": "SP", "desc": "어깨끝점 (어깨경사선 × 어깨너비선)", "kind": "intersect", "a1": "SNP", "a2": "SH_DIR", "b1": "SWL_T", "b2": "SWL_B" },
-    { "id": "BL_C", "desc": "앞중심 × 진동깊이선 (B/4)", "kind": "xy", "x": 0, "y": "B/4" },
-    { "id": "BL_S", "desc": "겨드랑점 (가슴선 옆끝)", "kind": "xy", "x": "B/4+BUST_EASE", "y": "B/4" },
-    { "id": "FW_T", "desc": "앞품선 위 (제도 보조)", "kind": "xy", "x": "B/6+FW_ADD", "y": -1 },
-    { "id": "FW_B", "desc": "앞품선 아래", "kind": "xy", "x": "B/6+FW_ADD", "y": "B/4" },
-    { "id": "AH_P", "desc": "앞품점 — 암홀은 x 만 쓴다", "kind": "on", "a": "FW_T", "b": "FW_B", "t": 0.65 },
-    { "id": "WL_C", "desc": "앞중심 허리점", "kind": "xy", "x": 0, "y": "BACK_LEN" },
-    { "id": "WL_S", "desc": "옆선 허리점 — 무다트라 가슴폭 그대로 내려온다", "kind": "xy", "x": "B/4+BUST_EASE", "y": "BACK_LEN" }
+    {
+      "id": "A",
+      "desc": "앞중심 × 옆목 수평선 (제도 원점)",
+      "kind": "xy",
+      "x": 0,
+      "y": 0
+    },
+    {
+      "id": "SNP",
+      "desc": "앞 옆목점",
+      "kind": "xy",
+      "x": "NW",
+      "y": "-NECK_UP"
+    },
+    {
+      "id": "FNP",
+      "desc": "앞목점 (B/12+0.3)",
+      "kind": "xy",
+      "x": 0,
+      "y": "B/12+FND_ADD"
+    },
+    {
+      "id": "SH_DIR",
+      "desc": "어깨 경사 방향점 (제도 보조)",
+      "kind": "polar",
+      "from": "SNP",
+      "angle": "-SH_ANGLE",
+      "dist": 20
+    },
+    {
+      "id": "SWL_T",
+      "desc": "어깨너비선 위 (제도 보조)",
+      "kind": "xy",
+      "x": "SW/2",
+      "y": -1
+    },
+    {
+      "id": "SWL_B",
+      "desc": "어깨너비선 아래 (제도 보조)",
+      "kind": "xy",
+      "x": "SW/2",
+      "y": 20
+    },
+    {
+      "id": "SP",
+      "desc": "어깨끝점 (어깨경사선 × 어깨너비선)",
+      "kind": "intersect",
+      "a1": "SNP",
+      "a2": "SH_DIR",
+      "b1": "SWL_T",
+      "b2": "SWL_B"
+    },
+    {
+      "id": "BL_C",
+      "desc": "앞중심 × 진동깊이선 (B/4)",
+      "kind": "xy",
+      "x": 0,
+      "y": "B/4"
+    },
+    {
+      "id": "BL_S",
+      "desc": "겨드랑점 (가슴선 옆끝)",
+      "kind": "xy",
+      "x": "B/4+BUST_EASE",
+      "y": "B/4"
+    },
+    {
+      "id": "FW_T",
+      "desc": "앞품선 위 (제도 보조)",
+      "kind": "xy",
+      "x": "B/6+FW_ADD",
+      "y": -1
+    },
+    {
+      "id": "FW_B",
+      "desc": "앞품선 아래",
+      "kind": "xy",
+      "x": "B/6+FW_ADD",
+      "y": "B/4"
+    },
+    {
+      "id": "AH_P",
+      "desc": "앞품점 — 암홀은 x 만 쓴다",
+      "kind": "on",
+      "a": "FW_T",
+      "b": "FW_B",
+      "t": 0.65
+    },
+    {
+      "id": "WL_C",
+      "desc": "앞중심 허리점",
+      "kind": "xy",
+      "x": 0,
+      "y": "BACK_LEN"
+    },
+    {
+      "id": "WL_S",
+      "desc": "옆선 허리점 — 무다트라 가슴폭 그대로 내려온다",
+      "kind": "xy",
+      "x": "B/4+BUST_EASE",
+      "y": "BACK_LEN"
+    }
   ],
   "segments": [
-    { "id": "box", "desc": "제도 기초 사각형", "kind": "line", "layer": "guide", "pts": ["A", "BL_S", "WL_S", "WL_C"], "closed": false },
-    { "id": "bust_line", "desc": "진동깊이선 (B/4)", "kind": "line", "layer": "guide", "pts": ["BL_C", "BL_S"], "closed": false },
-    { "id": "fw_line", "desc": "앞품선", "kind": "line", "layer": "guide", "pts": ["FW_T", "FW_B"], "closed": false },
-    { "id": "sh_line", "desc": "어깨 경사선 (제도 보조)", "kind": "line", "layer": "construction", "pts": ["SNP", "SH_DIR"], "closed": false },
-    { "id": "swl", "desc": "어깨너비선 (제도 보조)", "kind": "line", "layer": "construction", "pts": ["SWL_T", "SWL_B"], "closed": false },
-    { "id": "neck", "desc": "앞목선", "kind": "neck", "layer": "cut", "center": "FNP", "snp": "SNP", "shoulder": "SP" },
-    { "id": "shoulder", "desc": "어깨선", "kind": "line", "layer": "cut", "pts": ["SNP", "SP"], "closed": false },
-    { "id": "armhole", "desc": "앞 진동 (셋인)", "kind": "armhole", "layer": "cut", "shoulder": "SP", "neck": "SNP", "pitch": "AH_P", "bottom": "BL_S" },
-    { "id": "cf", "desc": "앞중심 (골)", "kind": "line", "layer": "fold", "pts": ["FNP", "WL_C"], "closed": false },
-    { "id": "side", "desc": "옆선 — 무다트라 수직", "kind": "line", "layer": "cut", "pts": ["BL_S", "WL_S"], "closed": false },
-    { "id": "waist", "desc": "허리선", "kind": "line", "layer": "cut", "pts": ["WL_C", "WL_S"], "closed": false }
+    {
+      "id": "box",
+      "desc": "제도 기초 사각형",
+      "kind": "line",
+      "layer": "guide",
+      "pts": [
+        "A",
+        "BL_S",
+        "WL_S",
+        "WL_C"
+      ],
+      "closed": false
+    },
+    {
+      "id": "bust_line",
+      "desc": "진동깊이선 (B/4)",
+      "kind": "line",
+      "layer": "guide",
+      "pts": [
+        "BL_C",
+        "BL_S"
+      ],
+      "closed": false
+    },
+    {
+      "id": "fw_line",
+      "desc": "앞품선",
+      "kind": "line",
+      "layer": "guide",
+      "pts": [
+        "FW_T",
+        "FW_B"
+      ],
+      "closed": false
+    },
+    {
+      "id": "sh_line",
+      "desc": "어깨 경사선 (제도 보조)",
+      "kind": "line",
+      "layer": "construction",
+      "pts": [
+        "SNP",
+        "SH_DIR"
+      ],
+      "closed": false
+    },
+    {
+      "id": "swl",
+      "desc": "어깨너비선 (제도 보조)",
+      "kind": "line",
+      "layer": "construction",
+      "pts": [
+        "SWL_T",
+        "SWL_B"
+      ],
+      "closed": false
+    },
+    {
+      "id": "neck",
+      "desc": "앞목선",
+      "kind": "neck",
+      "layer": "cut",
+      "center": "FNP",
+      "snp": "SNP",
+      "shoulder": "SP"
+    },
+    {
+      "id": "shoulder",
+      "desc": "어깨선",
+      "kind": "line",
+      "layer": "cut",
+      "pts": [
+        "SNP",
+        "SP"
+      ],
+      "closed": false
+    },
+    {
+      "id": "armhole",
+      "desc": "앞 진동 (셋인)",
+      "kind": "armhole",
+      "layer": "cut",
+      "shoulder": "SP",
+      "neck": "SNP",
+      "pitch": "AH_P",
+      "bottom": "BL_S"
+    },
+    {
+      "id": "cf",
+      "desc": "앞중심 (골)",
+      "kind": "line",
+      "layer": "fold",
+      "pts": [
+        "FNP",
+        "WL_C"
+      ],
+      "closed": false
+    },
+    {
+      "id": "side",
+      "desc": "옆선 — 무다트라 수직",
+      "kind": "line",
+      "layer": "cut",
+      "pts": [
+        "BL_S",
+        "WL_S"
+      ],
+      "closed": false
+    },
+    {
+      "id": "waist",
+      "desc": "허리선",
+      "kind": "line",
+      "layer": "cut",
+      "pts": [
+        "WL_C",
+        "WL_S"
+      ],
+      "closed": false
+    }
   ],
   "darts": [],
   "notches": [],

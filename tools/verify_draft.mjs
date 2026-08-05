@@ -12,6 +12,7 @@ import { fileURLToPath } from 'node:url';
  * 퍼센트 인코딩되므로 fileURLToPath 를 쓴다. */
 const 예제경로 = (n) => fileURLToPath(new URL(`../examples/${n}`, import.meta.url));
 const 스캔앞판 = () => loadDraft(예제경로('scan025-front.draft.json')).drawing;
+const 열기 = (n) => loadDraft(예제경로(n)).drawing;
 
 let fail = 0;
 const bad = (m) => { console.error('✖ ' + m); fail++; };
@@ -147,11 +148,21 @@ near(d.segments.find((s) => s.id === 'neck').length, 11.9247, '앞 목선 길이
     near(t[0] * sh[0] + t[1] * sh[1], 0, '민소매 진동이 SP 에서 어깨선과 직각', 1e-9);
   }
 
-  // (2) 겨드랑에는 수평으로 도착 — 앞뒤판을 박았을 때 진동이 한 줄로 이어져야 한다
+  /* (2) 겨드랑에서 **옆선과 직각**으로 만나야 한다 — 앞뒤판을 박았을 때 진동이 한 줄로
+   *     이어지려면 그래야 한다. 각이 지면 거기서 실이 뜯긴다.
+   *     "수평으로 도착" 으로 두면 옆선이 수직인 패턴에서만 맞다. 허리를 넣어 옆선이 기운
+   *     scan025 에서 실제로 100.7도(10.7도 어긋남)가 나왔다. */
   {
     const g = ah.segs[ah.segs.length - 1];
     const t = 단위([g.p1[0] - g.c2[0], g.p1[1] - g.c2[1]]);
-    near(t[1], 0, '민소매 진동이 겨드랑에 수평으로 도착', 1e-9);
+    const side = 민.segments.find((s) => s.id === 'side');
+    const sd = 단위([side.pts[1][0] - side.pts[0][0], side.pts[1][1] - side.pts[0][1]]);
+    const ang = Math.acos(Math.max(-1, Math.min(1, t[0] * sd[0] + t[1] * sd[1]))) * 180 / Math.PI;
+    /* 옆선이 곡선이라 폴리라인 첫 구간 방향과 UA→옆선점 직선 방향이 조금 다르다.
+     * 2도는 봉제에서 무의미하지만, 도착 접선을 잘못 잡으면 10도 넘게 벌어진다. */
+    if (Math.abs(ang - 90) > 2) {
+      bad(`민소매 진동이 옆선과 ${ang.toFixed(1)}도로 만난다 (90도여야 한다 — 이음매에 각이 진다)`);
+    }
   }
 
   /* (3) ★ 전 구간이 현보다 **안쪽**에 있어야 한다. 한 점이라도 바깥으로 나가면
@@ -247,6 +258,35 @@ near(d.segments.find((s) => s.id === 'neck').length, 11.9247, '앞 목선 길이
 
   // label 이 비면 값만 남아 쓸모가 없다
   for (const d of 민.dims) if (!String(d.label).trim()) bad(`치수선 '${d.id}' 에 식(label)이 없다`);
+}
+
+/* ── 무다트 원형의 치수선
+ *
+ * 축 성분(axis)을 안 쓰고 두 점 사이 실거리로 재면 옆목 올림·어깨 경사가 섞여
+ * "어깨너비/2 = 19.83" 처럼 식과 값이 어긋난다. 실제로 그랬다 — 그래서 여기서 못 박는다. */
+for (const [파일, 기대] of [
+  ['block-mudart-front.draft.json', { d_nw: 6.6, d_fnd: 86 / 12 + 0.3, d_ahd: 21.5, d_bust: 23.0, d_len: 38, d_sw: 19.5 }],
+  ['block-mudart-back.draft.json', { d_nw: 6.6, d_bnd: 2.2, d_ahd: 21.5, d_bust: 23.4, d_len: 38, d_sw: 19.5 }],
+]) {
+  const d = 열기(파일);
+  if (!d.dims.length) bad(`${파일} 에 치수선이 없다`);
+  for (const [id, want] of Object.entries(기대)) {
+    const x = d.dims.find((v) => v.id === id);
+    if (!x) { bad(`${파일}: 치수선 '${id}' 가 없다`); continue; }
+    near(x.length, want, `${파일} ${id} (${x.label})`, 0.005);
+  }
+  // 원형은 무다트다 — 옆선이 수직이어야 한다(다트로 뺄 여유가 없다)
+  const side = d.segments.find((v) => v.id === 'side');
+  near(side.pts[0][0], side.pts[side.pts.length - 1][0], `${파일} 옆선이 수직 (무다트)`, 1e-12);
+  if (d.darts.length) bad(`${파일}: 무다트 원형인데 다트가 ${d.darts.length}개 있다`);
+}
+
+// 소매산 높이 치수선이 소매길이를 재고 있지 않은지 (실제로 그랬다)
+{
+  const sl = 열기('bunka-sleeve.draft.json');
+  const sc = sl.dims.find((v) => v.id === 'd_sc');
+  const cap = sl.segments.find((v) => v.id === 'cap');
+  near(sc.length, cap.derived.SC, '소매산 높이 치수선 = 실제 소매산 높이', 1e-9);
 }
 
 // ── 뒤어깨 늘림: hypot() 식이 실제로 SH_EASE 만큼 길게 만들었나

@@ -69,15 +69,17 @@
       "a": "A",
       "b": "SNP",
       "label": "6.6",
-      "offset": 1.2
+      "offset": 1.2,
+      "axis": "x"
     },
     {
       "id": "d_bnd",
       "desc": "뒤목깊이",
-      "a": "A",
+      "a": "SNP",
       "b": "CNP",
       "label": "목너비/3",
-      "offset": -1.5
+      "offset": -1.5,
+      "axis": "y"
     },
     {
       "id": "d_ahd",
@@ -85,7 +87,8 @@
       "a": "A",
       "b": "BL_C",
       "label": "B/4",
-      "offset": -3.4
+      "offset": -3.4,
+      "axis": "y"
     },
     {
       "id": "d_bust",
@@ -93,7 +96,8 @@
       "a": "BL_C",
       "b": "BL_S",
       "label": "B/4+여유분 1.9",
-      "offset": 2.2
+      "offset": 2.2,
+      "axis": "x"
     },
     {
       "id": "d_len",
@@ -101,7 +105,8 @@
       "a": "A",
       "b": "WL_C",
       "label": "등길이",
-      "offset": -5.4
+      "offset": -5.4,
+      "axis": "y"
     },
     {
       "id": "d_sw",
@@ -109,7 +114,8 @@
       "a": "A",
       "b": "SP",
       "label": "어깨너비/2",
-      "offset": 1.4
+      "offset": 1.4,
+      "axis": "x"
     }
   ],
   "points": [

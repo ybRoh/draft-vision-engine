@@ -72,9 +72,10 @@
       "id": "d_sc",
       "desc": "소매산 높이",
       "a": "APEX",
-      "b": "HEM_M",
+      "b": "CAP_F",
       "label": "AH/4+2",
-      "offset": -1.8
+      "offset": -1.8,
+      "axis": "y"
     },
     {
       "id": "d_biceps",
@@ -82,7 +83,8 @@
       "a": "CAP_B",
       "b": "CAP_F",
       "label": "대각선 앞AH−1 / 뒤AH−1 로 정해짐",
-      "offset": 1.8
+      "offset": 1.8,
+      "axis": "x"
     },
     {
       "id": "d_len",
@@ -90,7 +92,8 @@
       "a": "APEX",
       "b": "HEM_M",
       "label": "22",
-      "offset": 2.4
+      "offset": 2.4,
+      "axis": "y"
     }
   ],
   "points": [

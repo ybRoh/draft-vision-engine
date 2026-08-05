@@ -79,7 +79,8 @@
       "a": "A",
       "b": "SNP",
       "label": "B/20+2.9",
-      "offset": 1.2
+      "offset": 1.2,
+      "axis": "x"
     },
     {
       "id": "d_fnd",
@@ -87,7 +88,8 @@
       "a": "A",
       "b": "FNP",
       "label": "목너비+1",
-      "offset": -1.5
+      "offset": -1.5,
+      "axis": "y"
     },
     {
       "id": "d_ahd",
@@ -95,7 +97,8 @@
       "a": "A",
       "b": "CF_B",
       "label": "B/6+7",
-      "offset": -3.2
+      "offset": -3.2,
+      "axis": "y"
     },
     {
       "id": "d_bust",
@@ -103,7 +106,8 @@
       "a": "CF_B",
       "b": "SIDE_B",
       "label": "B/4+1",
-      "offset": 2.0
+      "offset": 2.0,
+      "axis": "x"
     },
     {
       "id": "d_wl",
@@ -111,7 +115,8 @@
       "a": "A",
       "b": "CF_W",
       "label": "WL",
-      "offset": -5.2
+      "offset": -5.2,
+      "axis": "y"
     }
   ],
   "points": [

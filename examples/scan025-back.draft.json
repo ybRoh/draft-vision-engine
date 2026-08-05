@@ -112,15 +112,17 @@
       "a": "A",
       "b": "SNP",
       "label": "6.6",
-      "offset": 1.2
+      "offset": 1.2,
+      "axis": "x"
     },
     {
       "id": "d_bnd",
       "desc": "뒤목깊이",
-      "a": "A",
+      "a": "SNP",
       "b": "CNP",
       "label": "목너비/3",
-      "offset": -1.5
+      "offset": -1.5,
+      "axis": "y"
     },
     {
       "id": "d_ahd",
@@ -128,7 +130,8 @@
       "a": "A",
       "b": "BL_C",
       "label": "B/4",
-      "offset": -3.4
+      "offset": -3.4,
+      "axis": "y"
     },
     {
       "id": "d_shw",
@@ -136,7 +139,8 @@
       "a": "SNP",
       "b": "SP",
       "label": "6.4",
-      "offset": 1.2
+      "offset": 1.2,
+      "axis": "both"
     },
     {
       "id": "d_ua",
@@ -144,7 +148,8 @@
       "a": "BL_S",
       "b": "UA",
       "label": "1.9~3.8",
-      "offset": -1.6
+      "offset": -1.6,
+      "axis": "y"
     },
     {
       "id": "d_bust",
@@ -152,7 +157,8 @@
       "a": "BL_C",
       "b": "BL_S",
       "label": "B/4+여유분 1.9",
-      "offset": 2.2
+      "offset": 2.2,
+      "axis": "x"
     },
     {
       "id": "d_waist",
@@ -160,7 +166,8 @@
       "a": "WL_C",
       "b": "WL_S",
       "label": "W/4+여유분 2.5",
-      "offset": 2.2
+      "offset": 2.2,
+      "axis": "x"
     },
     {
       "id": "d_hip",
@@ -168,7 +175,8 @@
       "a": "HL_C",
       "b": "HL_S",
       "label": "H/4+여유분 1",
-      "offset": -2.2
+      "offset": -2.2,
+      "axis": "x"
     },
     {
       "id": "d_hiplen",
@@ -176,7 +184,8 @@
       "a": "WL_C",
       "b": "HL_C",
       "label": "19",
-      "offset": -2.4
+      "offset": -2.4,
+      "axis": "y"
     },
     {
       "id": "d_len",
@@ -184,7 +193,8 @@
       "a": "A",
       "b": "HEM_C",
       "label": "58.4",
-      "offset": -5.4
+      "offset": -5.4,
+      "axis": "y"
     }
   ],
   "points": [
@@ -384,7 +394,8 @@
       "neck": "SNP",
       "pitch": "AH_P",
       "bottom": "UA",
-      "scoop": "AH_IN"
+      "scoop": "AH_IN",
+      "side": "WL_S"
     },
     {
       "id": "cb",
