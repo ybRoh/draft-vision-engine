@@ -112,6 +112,39 @@ const cap = (d) => d.segments.find((s) => s.id === 'cap');
   }
 }
 
+/* ── 합인 너치의 **호길이** — 몸판 암홀에 옮겨 찍을 값
+ *
+ * 제도점은 현(대각선) 위에 놓는다. 하지만 봉제할 때 재는 것은 곡선을 따라간 길이다.
+ * 둘은 다르다(앞 제도거리 AH/8 = 4.89 → 호길이 5.05). 몸판에 옮길 때 현 거리를 쓰면
+ * 그만큼 어긋난다. */
+{
+  const d = 열기().drawing, c = cap(d);
+  const 호 = (pts, target) => {
+    let best = 0, bd = Infinity, acc = 0;
+    for (let i = 1; i < pts.length; i++) {
+      acc += Math.hypot(pts[i][0] - pts[i - 1][0], pts[i][1] - pts[i - 1][1]);
+      const dist = Math.hypot(pts[i][0] - target[0], pts[i][1] - target[1]);
+      if (dist < bd) { bd = dist; best = acc; }
+    }
+    return { arc: best, miss: bd };
+  };
+  const f = 호([...c.pts].reverse(), [d.points.CAP_NF.x, d.points.CAP_NF.y]);
+  const b = 호(c.pts, [d.points.CAP_NB.x, d.points.CAP_NB.y]);
+  if (f.miss > 0.02) bad(`앞 합인 너치가 소매산 곡선 위에 없다 (${f.miss.toFixed(3)}cm 벗어남)`);
+  if (b.miss > 0.02) bad(`뒤 합인 너치가 소매산 곡선 위에 없다 (${b.miss.toFixed(3)}cm 벗어남)`);
+  near(c.derived.notchArcF, f.arc, '앞 합인 호길이가 실측과 일치', 0.02);
+  near(c.derived.notchArcB, b.arc, '뒤 합인 호길이가 실측과 일치', 0.02);
+  /* 호길이는 제도거리(현)보다 길어야 한다. 같으면 현 거리를 그대로 내보낸 것이고,
+   * 그 값을 몸판에 옮겨 찍으면 소매가 안 맞는다. */
+  const AH = c.derived.AH;
+  if (!(c.derived.notchArcF > AH / 8 + 0.01)) {
+    bad(`앞 합인 호길이 ${c.derived.notchArcF.toFixed(2)} 가 제도거리 AH/8 ${(AH / 8).toFixed(2)} 보다 길지 않다`);
+  }
+  if (!(c.derived.notchArcB > AH / 12 + 0.6 + 0.005)) {
+    bad(`뒤 합인 호길이 ${c.derived.notchArcB.toFixed(2)} 가 제도거리 ${(AH / 12 + 0.6).toFixed(2)} 보다 길지 않다`);
+  }
+}
+
 /* ── 도해의 "0~1 을 뺀다" 가 이세 조절 레버로 작동하는가.
  *   많이 뺄수록 현이 짧아지고 → 이세가 준다. 이 방향이 뒤집히면 제도법이 뒤집힌 것이다. */
 {

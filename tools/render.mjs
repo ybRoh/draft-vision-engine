@@ -101,6 +101,11 @@ const base = opt('out') ?? path.join('out', path.basename(file).replace(/\.draft
 fs.mkdirSync(path.dirname(base), { recursive: true });
 fs.writeFileSync(base + '.svg', svg);
 fs.writeFileSync(base + '.dxf', dxf);
+const cap = drawing.segments.find((s) => s.kind === 'sleevecap');
+if (cap) {
+  console.log(`  소매산 ${cap.derived.SC.toFixed(1)}cm · 곡선 ${cap.length.toFixed(2)} (AH ${cap.derived.AH.toFixed(2)} · 이세 ${cap.derived.ease.toFixed(2)})`);
+  console.log(`  합인 너치 — 겨드랑에서 곡선 따라 앞 ${cap.derived.notchArcF.toFixed(2)}cm · 뒤 ${cap.derived.notchArcB.toFixed(2)}cm (몸판 암홀에 같은 호길이로 옮겨 찍는다)`);
+}
 if (deps.length) {
   console.log(`  참조: ${deps.map((d) => path.relative(process.cwd(), d)).join(' · ')}`);
 }
