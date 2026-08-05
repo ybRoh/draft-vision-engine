@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "name": "반소매 원형 (교재 「반소매 원형」 제도법)",
+  "name": "반소매 원형",
   "source": {
     "book": "반소매 원형 (교재 도해 전사)",
     "page": "미상"
@@ -79,11 +79,11 @@
     },
     {
       "id": "d_biceps",
-      "desc": "소매통",
+      "desc": "소매통 (대각선 앞AH−1 / 뒤AH−1 로 정해진다)",
       "a": "CAP_B",
       "b": "CAP_F",
-      "label": "대각선 앞AH−1 / 뒤AH−1 로 정해짐",
-      "offset": 1.8,
+      "label": "소매통",
+      "offset": 2.6,
       "axis": "x"
     },
     {
@@ -92,7 +92,7 @@
       "a": "APEX",
       "b": "HEM_M",
       "label": "22",
-      "offset": 2.4,
+      "offset": 6.0,
       "axis": "y"
     }
   ],
