@@ -145,6 +145,42 @@ const cap = (d) => d.segments.find((s) => s.id === 'cap');
   }
 }
 
+/* ── 몸판 진동 합인 너치가 소매산 합인과 **같은 호길이**에 있는가
+ *
+ * 이게 안 맞으면 소매를 끼울 때 어긋난 채로 박게 된다. 몸판은 소매를 참조할 수 없어
+ * (고리가 된다) 비율을 전사해 박았다 — 그 전사가 사이즈 전체에서 유효한지 여기서 잰다. */
+{
+  const 앞 = 예제('bunka-front.draft.json'), 뒤 = 예제('bunka-back.draft.json');
+  for (const B of [78, 82, 86, 92, 98]) {
+    const c = cap(loadDraft(소매, { B }).drawing);
+    for (const [쪽, 파일, 소매호] of [['앞', 앞, c.derived.notchArcF], ['뒤', 뒤, c.derived.notchArcB]]) {
+      const d = loadDraft(파일, { B }).drawing;
+      const ah = d.segments.find((s) => s.id === 'armhole');
+      const p = d.points.AH_N;
+      if (!p) { bad(`${파일}: 진동 합인 너치 점(AH_N)이 없다`); continue; }
+      // along 은 호길이 비율이므로 t × 전체길이 가 곧 겨드랑에서의 호길이다
+      const 몸판호 = d.scope.AH_NOTCH_T * ah.length;
+      const 차 = Math.abs(몸판호 - 소매호);
+      if (차 > 0.1) {
+        bad(`B=${B} ${쪽} 진동 합인이 소매산 합인과 ${차.toFixed(3)}cm 어긋난다`
+          + ` (몸판 ${몸판호.toFixed(3)} · 소매 ${소매호.toFixed(3)})`);
+      }
+      /* 너치가 실제로 진동 곡선 위에 있는지.
+       * **꼭짓점**까지의 거리로 재면 안 된다 — 폴리라인 꼭짓점은 0.3cm 간격이라
+       * 사이에 놓인 점이 0.1cm 벗어난 것처럼 나온다(실제로 그렇게 잘못 쟀다).
+       * 선분까지의 수직거리로 잰다. */
+      let bd = Infinity;
+      for (let i = 1; i < ah.pts.length; i++) {
+        const [x1, y1] = ah.pts[i - 1], [x2, y2] = ah.pts[i];
+        const dx = x2 - x1, dy = y2 - y1, L2 = dx * dx + dy * dy;
+        const t = L2 > 1e-18 ? Math.max(0, Math.min(1, ((p.x - x1) * dx + (p.y - y1) * dy) / L2)) : 0;
+        bd = Math.min(bd, Math.hypot(p.x - (x1 + dx * t), p.y - (y1 + dy * t)));
+      }
+      if (bd > 0.01) bad(`B=${B} ${쪽} 진동 합인 너치가 곡선 위에 없다 (${bd.toFixed(3)}cm 벗어남)`);
+    }
+  }
+}
+
 /* ── 도해의 "0~1 을 뺀다" 가 이세 조절 레버로 작동하는가.
  *   많이 뺄수록 현이 짧아지고 → 이세가 준다. 이 방향이 뒤집히면 제도법이 뒤집힌 것이다. */
 {

@@ -7,11 +7,11 @@ import { fsArmhole } from '../lib/curve.mjs';
 import { loadDraft } from '../lib/project.mjs';
 import { fileURLToPath } from 'node:url';
 
-/* scan025 는 compare(원형비교패턴)를 쓰므로 resolve() 로는 못 연다 — 다른 조각의 도형이
+/* 오버블라우스는 compare(원형비교패턴)를 쓰므로 resolve() 로는 못 연다 — 다른 조각의 도형이
  * 필요하기 때문이다. 파일을 따라가는 loadDraft 로 연다. URL.pathname 은 한글 경로에서
  * 퍼센트 인코딩되므로 fileURLToPath 를 쓴다. */
 const 예제경로 = (n) => fileURLToPath(new URL(`../examples/${n}`, import.meta.url));
-const 스캔앞판 = () => loadDraft(예제경로('scan025-front.draft.json')).drawing;
+const 스캔앞판 = () => loadDraft(예제경로('overblouse-mudart-front.draft.json')).drawing;
 const 열기 = (n) => loadDraft(예제경로(n)).drawing;
 
 let fail = 0;
@@ -134,7 +134,7 @@ near(d.segments.find((s) => s.id === 'neck').length, 11.9247, '앞 목선 길이
 {
   const 민 = 스캔앞판();
   const ah = 민.segments.find((s) => s.id === 'armhole');
-  if (ah.kind !== 'armhole_sleeveless') bad(`scan025 앞판 진동 kind 가 ${ah.kind} 다 (기대 armhole_sleeveless)`);
+  if (ah.kind !== 'armhole_sleeveless') bad(`오버블라우스 앞판 진동 kind 가 ${ah.kind} 다 (기대 armhole_sleeveless)`);
   const SP = [민.points.SP.x, 민.points.SP.y];
   const UA = [민.points.UA.x, 민.points.UA.y];
   const SNP = [민.points.SNP.x, 민.points.SNP.y];
@@ -151,7 +151,7 @@ near(d.segments.find((s) => s.id === 'neck').length, 11.9247, '앞 목선 길이
   /* (2) 겨드랑에서 **옆선과 직각**으로 만나야 한다 — 앞뒤판을 박았을 때 진동이 한 줄로
    *     이어지려면 그래야 한다. 각이 지면 거기서 실이 뜯긴다.
    *     "수평으로 도착" 으로 두면 옆선이 수직인 패턴에서만 맞다. 허리를 넣어 옆선이 기운
-   *     scan025 에서 실제로 100.7도(10.7도 어긋남)가 나왔다. */
+   *     오버블라우스에서 실제로 100.7도(10.7도 어긋남)가 나왔다. */
   {
     const g = ah.segs[ah.segs.length - 1];
     const t = 단위([g.p1[0] - g.c2[0], g.p1[1] - g.c2[1]]);
@@ -197,7 +197,7 @@ near(d.segments.find((s) => s.id === 'neck').length, 11.9247, '앞 목선 길이
  * 그레이딩 검증과 용지 배치가 남의 조각 크기를 따라간다. */
 {
   const 민 = 스캔앞판();
-  if (!민.compares.length) bad('scan025 앞판에 원형비교패턴이 없다');
+  if (!민.compares.length) bad('오버블라우스 앞판에 원형비교패턴이 없다');
   for (const c of 민.compares) {
     if (!c.lines.length) bad(`비교패턴 '${c.id}' 에 선이 하나도 없다`);
     for (const pts of c.lines) if (pts.length < 2) bad(`비교패턴 '${c.id}' 에 점 1개짜리 선이 있다`);
@@ -206,7 +206,7 @@ near(d.segments.find((s) => s.id === 'neck').length, 11.9247, '앞 목선 길이
   /* 비교패턴을 멀리 옮겨도 cutBbox 는 그대로여야 한다. 같은 자리에 두고 재면
    * "안 들어갔다" 를 증명할 수 없다 — 원형이 응용 안에 쏙 들어가 있어서다. */
   {
-    const 원본 = JSON.parse(fs.readFileSync(예제경로('scan025-front.draft.json'), 'utf8'));
+    const 원본 = JSON.parse(fs.readFileSync(예제경로('overblouse-mudart-front.draft.json'), 'utf8'));
     const 옮김 = JSON.parse(JSON.stringify(원본));
     옮김.compare[0].dx = 100;
     const tmp = 예제경로('.__cmp_test.draft.json');
@@ -229,7 +229,7 @@ near(d.segments.find((s) => s.id === 'neck').length, 11.9247, '앞 목선 길이
  * 교재 식을 그대로 넣고, 치수선은 **조각 안쪽**에 둔다(바깥이면 인쇄·네스팅에서 잘린다). */
 {
   const 민 = 스캔앞판();
-  if (!민.dims.length) bad('scan025 앞판에 치수선이 하나도 없다');
+  if (!민.dims.length) bad('오버블라우스 앞판에 치수선이 하나도 없다');
 
   // 교재 값과 실제 제도 결과가 일치하는가 — 식을 잘못 옮기면 여기서 갈린다
   const 기대 = { d_ahd: 21.5, d_bust: 23.0, d_waist: 19.5, d_hip: 24.0,
@@ -288,7 +288,7 @@ for (const [파일, 기대] of [
  * 뒤 경사만 완만하게 주고 이세를 빼먹으면 뒤가 오히려 짧아진다(실제로 0.14cm 짧았다). */
 for (const [이름, 앞, 뒤, 이세] of [
   ['무다트 원형', 'block-mudart-front.draft.json', 'block-mudart-back.draft.json', 0.7],
-  ['scan025', 'scan025-front.draft.json', 'scan025-back.draft.json', 0],
+  ['오버블라우스', 'overblouse-mudart-front.draft.json', 'overblouse-mudart-back.draft.json', 0],
 ]) {
   const F = 열기(앞), B = 열기(뒤);
   const len = (d, id) => d.segments.find((s) => s.id === id).length;
