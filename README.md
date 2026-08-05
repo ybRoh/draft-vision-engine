@@ -653,6 +653,35 @@ export ANTHROPIC_API_KEY=sk-ant-...
 ant auth login
 ```
 
+### `tools/pdf.mjs` — DSL → PDF (1:1 실물 크기)
+
+```bash
+node tools/pdf.mjs examples/overblouse-mudart-front.draft.json
+node tools/pdf.mjs examples/bunka-front.draft.json --set B=98 --out out/88호.pdf
+node tools/pdf.mjs examples/bunka-sleeve.draft.json --paper a3 --landscape --no-points
+```
+
+| 옵션 | 뜻 |
+|---|---|
+| `--out` | 저장 경로. 기본값은 `out/<입력파일이름>.pdf` |
+| `--set` | 치수·상수 덮어쓰기 (호수 변경). 참조하는 조각까지 함께 따라온다 |
+| `--paper` | `a4` · `a3` · `letter` (기본 a4) |
+| `--landscape` | 가로 방향 |
+| `--margin` | 인쇄 여백 cm (기본 1.0) — 프린터가 못 찍는 가장자리 |
+| `--no-points` | 점·이름을 빼고 선만 (재단용) |
+
+**패턴 PDF 의 존재 이유는 실물 크기다.** 화면에 예쁘게 보이는 것은 부차적이고, 자로 쟀을 때 도면 치수와 같아야 한다. 그래서 좌표를 pt 로만 환산해 넣고(1cm = 72/2.54 pt) 어떤 스케일도 걸지 않는다.
+
+**첫 장은 확인용**이다 — 5cm 검정 사각형이 들어 있다. 인쇄기가 축소했는지 사람이 바로 잴 수 있다. 프린터를 반드시 **실제 크기(100%)** 로 두어야 하며, "페이지에 맞춤" 을 켜면 축소되어 패턴을 못 쓴다.
+
+조각이 한 장을 넘으면 나눠 찍는다. 각 장 왼쪽 위에 시트 이름(`A1 / B3`)이 있고 네 모서리에 십자표가 있어 이웃 장과 맞춰 이어 붙인다.
+
+색은 SVG 와 같은 약속을 따른다 — 검정=패턴 제도선, 파랑=치수·계산식, 빨강=원형비교패턴.
+
+> **한글 글자는 PDF 안에 안 들어간다.** PDF 기본 14폰트(Helvetica 등)에 한글 글리프가 없어, 넣으면 깨진 글자가 찍힌다. 점 이름·계산식은 대개 ASCII 라 그대로 나오고, 한글이 섞인 라벨은 그 부분만 빠진다. 조각 이름 같은 한글 정보는 CLI 가 화면에 찍고 **파일 이름에는 한글이 남는다.** 폰트를 심으려면 TrueType 서브셋 임베딩이 필요한데 아직 없다.
+
+외부 라이브러리를 쓰지 않는다 — DXF 와 같이 손으로 쓴다(리포 원칙: npm 의존성 0).
+
 ### `tools/overlay.mjs` — 원본 위에 겹쳐 보기
 
 DSL 로 뽑은 도면을 교재 사진 위에 반투명으로 얹어, 어디가 어긋났는지 눈으로 찾는 도구다. [파이프라인](#파이프라인)의 되먹임 고리가 여기다 — 이 도구로 재서 고친 결과를 `examples/fewshot/` 에 쌓으면 다음 페이지 인식률이 올라간다.

@@ -16,6 +16,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 - **`schema.mjs`** — DSL(`draft-spec v1`) 정의 한 곳. `extract` 의 structured output 스키마이자 `validate` 의 검사 대상. `LAYER_LIST` 도 여기서 나간다
 - **`draft.mjs`** — 엔진의 심장. DSL → 좌표. 점 위상정렬 · `resolve(spec, overrides)` · `DraftError`
 - **`project.mjs`** — `loadDraft(파일, 덮어쓰기)`. refs 를 따라 다른 조각까지 읽고 풀어 준다. 파일 IO 는 전부 여기 (resolve 는 순수 함수로 둔다)
+- **`pdf.mjs`** — 1:1 실물 크기 PDF (A4 분할·5cm 확인 사각형·조립 십자표). 외부 라이브러리 없이 손으로 쓴다. 한글은 기본 폰트에 글리프가 없어 도면 안 글자에서 걷어낸다
 - **`curve.mjs`** — Freesewing(Brian block) through 곡선 · **제도법 곡선 `fsNeck`·`fsArmhole`·`sleevelessArmhole`·`bunkaSleeveCap`** · 베지어 길이(`segsLen`) · 폴리라인 길이(`polyLen`) · 직선 교점(`lineIntersect`). 벡터 헬퍼 `V`
 - **`svg.mjs`** — 도형 → SVG. cm 좌표 그대로 + `viewBox`, 1cm 모눈, 5cm 자
 - **`dxf.mjs`** — 도형 → DXF R12. `toDXF(drawing, {scale, textHeight, labels, title})` · 검증용 되읽기 `parseDXF` · 논리 레이어 → DXF 레이어 이름표 `DXF_LAYER` · `hasNonAscii`
@@ -40,6 +41,10 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 - **`index.html`** (리포 루트) — 산출물을 브라우저로 훑는 페이지(손으로 쓴 것). 경로가 `out/...` 라 **루트에 있어야** 한다. `out/` 안에 두면 gitignore 라 지워질 때 날아가고, 별도 폴더에 두면 상대경로가 깨진다 (둘 다 실제로 겪었다)
 
 ## 불변 규칙
+
+- **PDF 는 1:1 이 전부다** — 좌표를 pt 로만 환산하고(1cm = 72/2.54 pt) 어떤 스케일도 걸지 않는다. 첫 장 5cm 사각형은 지우지 말 것: 인쇄기가 축소했는지 사람이 재는 유일한 수단이다
+- **중심선에서 목선 시작·암홀 시작까지의 가로거리는 앞뒤가 같아야 한다** — 어깨를 박으면 한 줄이 되기 때문이다. 어깨 경사를 앞뒤 다르게 주면 어긋난다(18°/16° 로 뒀을 때 0.041cm). 원형은 예외 — 뒤 어깨 이세만큼 일부러 나가 있다
+
 
 - **원형에서 물려받은 선(`traced`)은 옮긴 뒤 끝을 바로잡는다** — 닮음변환은 모양을 살리지만 끝 접선까지 돌려서 어깨·옆선과의 직각이 깨진다(실제로 112°/71° 가 나왔다). `startPerp`/`endPerp` 로 고친다. 검증이 끝 각도와 원형 통과 여부를 **둘 다** 본다 — 하나만 보면 아무 곡선이나 통과한다
 - **곡선 위의 점은 `along`(호길이 비율)로 잡는다** — `on`(직선 비율)로 잡으면 곡선에서 어긋난다. 합인 너치처럼 상대 조각과 맞물리는 점에서는 그게 그대로 봉제 오차다. 절대 cm 가 아니라 **비율**이라야 사이즈를 바꿔도 소매와 계속 맞물린다
