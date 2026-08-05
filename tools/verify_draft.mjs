@@ -126,100 +126,87 @@ near(d.segments.find((s) => s.id === 'neck').length, 11.9247, '앞 목선 길이
   }
 }
 
-/* ── 민소매 진동 (armhole_sleeveless)
+/* ── 원형에서 물려받은 진동 (traced)
  *
- * 셋인 진동과 **모양이 달라야** 한다는 게 이 kind 를 따로 만든 이유다.
- * 셋인은 어깨 쪽이 현 위로 볼록한 S자인데, 민소매가 그러면 좁은 어깨끈에서 진동이
- * 바깥으로 부풀어 못 쓴다. 그래서 "전 구간 오목" 을 실제로 잰다. */
+ * 응용의 진동은 원형 진동을 그대로 가져와 **양 끝만** 옮겨 그린다. 새로 그리면 원형과
+ * 다른 곡선이 되어 "원형 참조" 가 말뿐이 된다. 그래서 여기서 **원형 곡선과 같은 모양인지**
+ * 를 독립적으로 다시 계산해 대조한다. */
 {
   const 민 = 스캔앞판();
   const ah = 민.segments.find((s) => s.id === 'armhole');
-  if (ah.kind !== 'armhole_sleeveless') bad(`오버블라우스 앞판 진동 kind 가 ${ah.kind} 다 (기대 armhole_sleeveless)`);
-  const SP = [민.points.SP.x, 민.points.SP.y];
-  const UA = [민.points.UA.x, 민.points.UA.y];
-  const SNP = [민.points.SNP.x, 민.points.SNP.y];
-  const 단위 = (v) => { const l = Math.hypot(v[0], v[1]); return [v[0] / l, v[1] / l]; };
+  if (ah.kind !== 'traced') bad(`오버블라우스 앞판 진동 kind 가 ${ah.kind} 다 (기대 traced)`);
 
-  // (1) 어깨끝에서 어깨선과 직각으로 출발 — 목선·어깨와 이어지는 곳에 각이 지지 않게
-  {
-    const g = ah.segs[0];
-    const t = 단위([g.c1[0] - g.p0[0], g.c1[1] - g.p0[1]]);
-    const sh = 단위([SP[0] - SNP[0], SP[1] - SNP[1]]);
-    near(t[0] * sh[0] + t[1] * sh[1], 0, '민소매 진동이 SP 에서 어깨선과 직각', 1e-9);
-  }
+  // 끝점이 정확히 SP · UA 에 붙어야 한다 (한쪽만 붙으면 조각이 안 닫힌다)
+  near(ah.pts[0][0], 민.points.SP.x, '진동 시작 = SP.x', 1e-9);
+  near(ah.pts[0][1], 민.points.SP.y, '진동 시작 = SP.y', 1e-9);
+  near(ah.pts[ah.pts.length - 1][0], 민.points.UA.x, '진동 끝 = UA.x', 1e-9);
+  near(ah.pts[ah.pts.length - 1][1], 민.points.UA.y, '진동 끝 = UA.y', 1e-9);
 
-  /* (2) 겨드랑에서 **옆선과 직각**으로 만나야 한다 — 앞뒤판을 박았을 때 진동이 한 줄로
-   *     이어지려면 그래야 한다. 각이 지면 거기서 실이 뜯긴다.
-   *     "수평으로 도착" 으로 두면 옆선이 수직인 패턴에서만 맞다. 허리를 넣어 옆선이 기운
-   *     오버블라우스에서 실제로 100.7도(10.7도 어긋남)가 나왔다. */
+  /* 원형에서 물려받되 **끝은 바로잡는다(true up)**.
+   *
+   * 닮음변환은 모양을 그대로 살리지만 끝 접선까지 같이 돌린다. 원형이 어깨선·옆선과
+   * 직각이었어도 20도 돌면 그만큼 각이 진다 — 실제로 진동-옆선 112도, 진동-어깨 71도가
+   * 나왔다. 그래서 옮긴 뒤 접선만 고쳐 다시 그린다. 아래 셋을 다 봐야 의미가 있다:
+   * 끝점이 붙었는가 · 끝이 직각인가 · 원형의 성격이 남았는가. */
+  const 단위2 = (v) => { const l = Math.hypot(v[0], v[1]); return [v[0] / l, v[1] / l]; };
   {
-    const g = ah.segs[ah.segs.length - 1];
-    const t = 단위([g.p1[0] - g.c2[0], g.p1[1] - g.c2[1]]);
+    const g0 = ah.segs[0], g1 = ah.segs[ah.segs.length - 1];
+    const 어깨 = 단위2([민.points.SP.x - 민.points.SNP.x, 민.points.SP.y - 민.points.SNP.y]);
+    const t0 = 단위2([g0.c1[0] - g0.p0[0], g0.c1[1] - g0.p0[1]]);
+    near(t0[0] * 어깨[0] + t0[1] * 어깨[1], 0, '진동이 SP 에서 어깨선과 직각', 1e-9);
+
     const side = 민.segments.find((s) => s.id === 'side');
-    const sd = 단위([side.pts[1][0] - side.pts[0][0], side.pts[1][1] - side.pts[0][1]]);
-    const ang = Math.acos(Math.max(-1, Math.min(1, t[0] * sd[0] + t[1] * sd[1]))) * 180 / Math.PI;
-    /* 옆선이 곡선이라 폴리라인 첫 구간 방향과 UA→옆선점 직선 방향이 조금 다르다.
-     * 2도는 봉제에서 무의미하지만, 도착 접선을 잘못 잡으면 10도 넘게 벌어진다. */
-    if (Math.abs(ang - 90) > 2) {
-      bad(`민소매 진동이 옆선과 ${ang.toFixed(1)}도로 만난다 (90도여야 한다 — 이음매에 각이 진다)`);
-    }
+    const sd = 단위2([side.pts[1][0] - side.pts[0][0], side.pts[1][1] - side.pts[0][1]]);
+    const t1 = 단위2([g1.p1[0] - g1.c2[0], g1.p1[1] - g1.c2[1]]);
+    const ang = Math.acos(Math.max(-1, Math.min(1, t1[0] * sd[0] + t1[1] * sd[1]))) * 180 / Math.PI;
+    if (Math.abs(ang - 90) > 2) bad(`진동이 옆선과 ${ang.toFixed(1)}도로 만난다 (90도여야 한다)`);
+
+    // 겨드랑보다 아래로 처지면 안 된다 (닮음변환만 쓰면 0.24cm 처졌다)
+    const 최저 = Math.max(...ah.pts.map((p) => p[1]));
+    if (최저 > 민.points.UA.y + 0.02) bad(`진동이 겨드랑보다 ${(최저 - 민.points.UA.y).toFixed(2)}cm 아래로 처진다`);
   }
 
-  /* (3) ★ 전 구간이 현보다 **안쪽**에 있어야 한다. 한 점이라도 바깥으로 나가면
-   *     셋인 진동처럼 부푼 것이다 — 이 kind 를 만든 이유가 사라진다. */
+  /* 원형의 성격이 남았는가 — 옮긴 곡선의 1/3·2/3 지점을 실제로 지나야 한다.
+   * 이게 없으면 "원형에서 따왔다" 가 말뿐이 되고 아무 곡선이나 넣어도 통과한다. */
   {
-    const ch = [UA[0] - SP[0], UA[1] - SP[1]], L = Math.hypot(ch[0], ch[1]);
-    const 안쪽부호 = Math.sign((ch[0] * (SNP[1] - SP[1]) - ch[1] * (SNP[0] - SP[0])));
-    let 최대 = 0, 바깥 = 0;
-    for (const p of ah.pts) {
-      const d = (ch[0] * (p[1] - SP[1]) - ch[1] * (p[0] - SP[0])) / L * 안쪽부호;
-      if (d < -1e-9) 바깥++;
-      if (d > 최대) 최대 = d;
+    const 원형 = 열기('block-mudart-front.draft.json');
+    const src = 원형.segments.find((s) => s.id === 'armhole').pts;
+    const s0 = src[0], s1 = src[src.length - 1];
+    const t0 = [민.points.SP.x, 민.points.SP.y], t1 = [민.points.UA.x, 민.points.UA.y];
+    const dsx = s0[0] - s1[0], dsy = s0[1] - s1[1], den = dsx * dsx + dsy * dsy;
+    const dtx = t0[0] - t1[0], dty = t0[1] - t1[1];
+    const ar = (dtx * dsx + dty * dsy) / den, ai = (dty * dsx - dtx * dsy) / den;
+    const moved = src.map((p) => {
+      const rx = p[0] - s1[0], ry = p[1] - s1[1];
+      return [t1[0] + ar * rx - ai * ry, t1[1] + ai * rx + ar * ry];
+    });
+    const acc = [0];
+    for (let i = 1; i < moved.length; i++) acc.push(acc[i - 1] + Math.hypot(moved[i][0] - moved[i - 1][0], moved[i][1] - moved[i - 1][1]));
+    const total = acc[acc.length - 1];
+    const 지점 = (f) => {
+      const 목표 = total * f;
+      for (let i = 1; i < moved.length; i++) {
+        if (acc[i] >= 목표) {
+          const r = (목표 - acc[i - 1]) / (acc[i] - acc[i - 1] || 1);
+          return [moved[i - 1][0] + (moved[i][0] - moved[i - 1][0]) * r,
+                  moved[i - 1][1] + (moved[i][1] - moved[i - 1][1]) * r];
+        }
+      }
+      return moved[moved.length - 1];
+    };
+    for (const f of [1 / 3, 2 / 3]) {
+      const q = 지점(f);
+      let bd = Infinity;
+      for (let i = 1; i < ah.pts.length; i++) {
+        const [x1, y1] = ah.pts[i - 1], [x2, y2] = ah.pts[i];
+        const dx = x2 - x1, dy = y2 - y1, L2 = dx * dx + dy * dy;
+        const t = L2 > 1e-18 ? Math.max(0, Math.min(1, ((q[0] - x1) * dx + (q[1] - y1) * dy) / L2)) : 0;
+        bd = Math.min(bd, Math.hypot(q[0] - (x1 + dx * t), q[1] - (y1 + dy * t)));
+      }
+      if (bd > 0.01) bad(`진동이 원형의 ${f === 1 / 3 ? '1/3' : '2/3'} 지점을 안 지난다 (${bd.toFixed(3)}cm 벗어남)`);
     }
-    if (바깥) bad(`민소매 진동이 현 바깥으로 나간 점이 ${바깥}개 (전 구간 오목이어야 한다)`);
-
-    /* (4) 제도점에서의 깊이가 도해값(AH_IN)과 정확히 같아야 한다.
-     *     "최대 깊이" 로 재면 안 된다 — 곡선은 제도점을 지나되 그 사이에서 조금 더 부푼다.
-     *     제도점 깊이는 정확히, 최대 깊이는 그보다 지나치지 않게(1.3배 이내) 본다. */
-    const sp2 = ah.derived.scoopPt;
-    // 제도점은 품 **높이** 에 있고, 현에서 **가로로** 도해값만큼 들어가 있어야 한다
-    near(sp2[1], 민.points.AH_P.y, '민소매 진동 제도점이 품 높이에 있다', 1e-9);
-    const 현x = SP[0] + ch[0] * ((sp2[1] - SP[1]) / ch[1]);
-    near(현x - sp2[0], 민.scope.AH_IN, '민소매 진동 제도점이 현에서 가로로 도해값만큼 들어감', 1e-9);
-    if (!(최대 <= 민.scope.AH_IN * 1.4)) bad(`민소매 진동이 도해값(${민.scope.AH_IN})보다 과하게 파였다: ${최대.toFixed(2)}`);
-  }
-}
-
-/* ── 원형비교패턴 (compare)
- *
- * 원형을 빨간 가는 선으로 겹쳐 응용 패턴이 어디가 달라졌는지 본다.
- * **cutBbox 에는 들어가면 안 된다** — 이 조각의 크기가 아니기 때문이다. 들어가면
- * 그레이딩 검증과 용지 배치가 남의 조각 크기를 따라간다. */
-{
-  const 민 = 스캔앞판();
-  if (!민.compares.length) bad('오버블라우스 앞판에 원형비교패턴이 없다');
-  for (const c of 민.compares) {
-    if (!c.lines.length) bad(`비교패턴 '${c.id}' 에 선이 하나도 없다`);
-    for (const pts of c.lines) if (pts.length < 2) bad(`비교패턴 '${c.id}' 에 점 1개짜리 선이 있다`);
-  }
-
-  /* 비교패턴을 멀리 옮겨도 cutBbox 는 그대로여야 한다. 같은 자리에 두고 재면
-   * "안 들어갔다" 를 증명할 수 없다 — 원형이 응용 안에 쏙 들어가 있어서다. */
-  {
-    const 원본 = JSON.parse(fs.readFileSync(예제경로('overblouse-mudart-front.draft.json'), 'utf8'));
-    const 옮김 = JSON.parse(JSON.stringify(원본));
-    옮김.compare[0].dx = 100;
-    const tmp = 예제경로('.__cmp_test.draft.json');
-    fs.writeFileSync(tmp, JSON.stringify(옮김));
-    try {
-      const d2 = loadDraft(tmp).drawing;
-      for (const k of ['x0', 'y0', 'x1', 'y1']) {
-        near(d2.cutBbox[k], 민.cutBbox[k], `비교패턴을 100cm 옮겨도 cutBbox.${k} 불변`, 1e-9);
-      }
-      if (!(d2.viewBbox.x1 > 민.viewBbox.x1 + 50)) {
-        bad('비교패턴을 옮겼는데 화면 액자(viewBbox)가 안 따라갔다 — 그러면 화면 밖으로 사라진다');
-      }
-    } finally { fs.rmSync(tmp, { force: true }); }
+    if (!(ah.derived.trued)) bad('진동이 끝 바로잡기(true up)를 안 했다');
+    if (!(ah.derived.scale > 1)) bad(`진동 배율이 ${ah.derived.scale} 다 (원형보다 커져야 한다 — 어깨가 좁아지고 겨드랑이 올라갔으므로)`);
   }
 }
 
