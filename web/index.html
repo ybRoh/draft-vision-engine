@@ -1,0 +1,429 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>제도인식엔진 — 산출물</title>
+  <style>
+    :root {
+      color-scheme: light;
+      --bg: #f6f6f4;
+      --fg: #1a1a18;
+      --muted: #55554e;
+      --subtle: #6b6b64;
+      --card-bg: #fff;
+      --border: #e2e2dc;
+      --border-hover: #b9b9ae;
+      --accent: #c9a227;
+      --code-bg: #ecece6;
+      --focus-ring: #0066cc;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      padding: clamp(16px, 4vw, 32px);
+      background: var(--bg);
+      color: var(--fg);
+      font: 15px/1.6 -apple-system, "Apple SD Gothic Neo", "Noto Sans KR",
+             "Malgun Gothic", "Segoe UI", sans-serif;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    .wrap {
+      max-width: 1100px;
+      margin: 0 auto;
+    }
+
+    h1 {
+      font-size: clamp(18px, 2.5vw, 22px);
+      margin: 0 0 6px;
+    }
+
+    .sub {
+      color: var(--subtle);
+      margin: 0 0 28px;
+      font-size: 14px;
+    }
+
+    h2 {
+      font-size: 15px;
+      margin: 34px 0 12px;
+      padding-bottom: 6px;
+      border-bottom: 1px solid #ddd;
+      color: #44443e;
+      font-weight: 600;
+    }
+
+    .grid {
+      display: grid;
+      gap: 16px;
+      grid-template-columns: repeat(auto-fill, minmax(min(100%, 240px), 1fr));
+    }
+
+    .card {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      overflow: hidden;
+      text-decoration: none;
+      color: inherit;
+      display: block;
+      transition: border-color .15s, box-shadow .15s, transform .1s;
+    }
+
+    .card:hover {
+      border-color: var(--border-hover);
+      box-shadow: 0 2px 8px rgba(0,0,0,.06);
+    }
+
+    .card:focus-visible {
+      outline: 3px solid var(--focus-ring);
+      outline-offset: 2px;
+      border-color: var(--focus-ring);
+    }
+
+    .card .thumb {
+      height: clamp(140px, 25vw, 190px);
+      background: #fff;
+      display: grid;
+      place-items: center;
+      border-bottom: 1px solid #eee;
+      overflow: hidden;
+    }
+
+    .card .thumb img,
+    .card .thumb .fallback {
+      max-width: 92%;
+      max-height: 92%;
+    }
+
+    .card .thumb .fallback {
+      display: none;
+      color: #999;
+      font-size: 13px;
+      text-align: center;
+      padding: 12px;
+    }
+
+    /* SVG 로딩 실패 시 fallback 표시 */
+    .card .thumb img.error + .fallback {
+      display: block;
+    }
+
+    .card .body {
+      padding: 10px 12px;
+    }
+
+    .card .t {
+      font-weight: 600;
+      font-size: 14px;
+    }
+
+    .card .d {
+      color: var(--subtle);
+      font-size: 12.5px;
+      margin-top: 2px;
+    }
+
+    ul.files {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+      display: grid;
+      gap: 8px;
+      grid-template-columns: repeat(auto-fill, minmax(min(100%, 260px), 1fr));
+    }
+
+    ul.files a {
+      display: block;
+      padding: 10px 12px;
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      text-decoration: none;
+      color: inherit;
+      transition: border-color .15s, box-shadow .15s;
+    }
+
+    ul.files a:hover {
+      border-color: var(--border-hover);
+      box-shadow: 0 1px 4px rgba(0,0,0,.05);
+    }
+
+    ul.files a:focus-visible {
+      outline: 3px solid var(--focus-ring);
+      outline-offset: 2px;
+    }
+
+    ul.files .d {
+      color: var(--subtle);
+      font-size: 12.5px;
+    }
+
+    code {
+      background: var(--code-bg);
+      padding: 1px 5px;
+      border-radius: 4px;
+      font-size: 13px;
+      word-break: break-all;
+    }
+
+    .note {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-left: 3px solid var(--accent);
+      border-radius: 6px;
+      padding: 12px 14px;
+      margin-top: 28px;
+      color: var(--muted);
+      font-size: 13.5px;
+    }
+
+    .note strong {
+      color: var(--fg);
+    }
+
+    /* Skip link for keyboard users */
+    .skip-link {
+      position: absolute;
+      top: -40px;
+      left: 0;
+      background: var(--fg);
+      color: #fff;
+      padding: 8px 16px;
+      text-decoration: none;
+      z-index: 100;
+      border-radius: 0 0 4px 0;
+    }
+
+    .skip-link:focus {
+      top: 0;
+    }
+
+    /* Reduced motion */
+    @media (prefers-reduced-motion: reduce) {
+      .card, ul.files a {
+        transition: none;
+      }
+    }
+  </style>
+</head>
+<body>
+  <a href="#main" class="skip-link">본문으로 이동</a>
+
+  <div class="wrap" id="main">
+    <h1>제도인식엔진 — 산출물</h1>
+    <p class="sub">교재 제도 도면 이미지 → 계산식 DSL → 자동 제도 → SVG / DXF</p>
+
+    <h2>도면 (SVG · 브라우저에서 바로 보임)</h2>
+    <div class="grid">
+      <a class="card" href="bunka-front.svg" aria-label="앞판 66호 도면 보기 (가슴둘레 86 기준)">
+        <div class="thumb">
+          <img src="bunka-front.svg?v=1" alt="앞판 66호 도면" onerror="this.classList.add('error')">
+          <div class="fallback" aria-hidden="true">도면을 불러올 수 없습니다</div>
+        </div>
+        <div class="body">
+          <div class="t">앞판 · 66호</div>
+          <div class="d">B=86 기준</div>
+        </div>
+      </a>
+
+      <a class="card" href="bunka-back.svg" aria-label="뒤판 66호 도면 보기 (가슴둘레 86 기준)">
+        <div class="thumb">
+          <img src="bunka-back.svg?v=1" alt="뒤판 66호 도면" onerror="this.classList.add('error')">
+          <div class="fallback" aria-hidden="true">도면을 불러올 수 없습니다</div>
+        </div>
+        <div class="body">
+          <div class="t">뒤판 · 66호</div>
+          <div class="d">B=86 기준</div>
+        </div>
+      </a>
+
+      <a class="card" href="bunka-front-44.svg" aria-label="앞판 44호 도면 보기 (가슴둘레 78 기준)">
+        <div class="thumb">
+          <img src="bunka-front-44.svg?v=1" alt="앞판 44호 도면" onerror="this.classList.add('error')">
+          <div class="fallback" aria-hidden="true">도면을 불러올 수 없습니다</div>
+        </div>
+        <div class="body">
+          <div class="t">앞판 · 44호</div>
+          <div class="d">--set B=78 — 식만 바꿔 다시 제도</div>
+        </div>
+      </a>
+
+      <a class="card" href="bunka-front-88.svg" aria-label="앞판 88호 도면 보기 (가슴둘레 98 기준)">
+        <div class="thumb">
+          <img src="bunka-front-88.svg?v=1" alt="앞판 88호 도면" onerror="this.classList.add('error')">
+          <div class="fallback" aria-hidden="true">도면을 불러올 수 없습니다</div>
+        </div>
+        <div class="body">
+          <div class="t">앞판 · 88호</div>
+          <div class="d">--set B=98 — 도면 전체가 따라온다</div>
+        </div>
+      </a>
+
+      <a class="card" href="bunka-sleeve.svg" aria-label="셋인 반소매 도면 보기">
+        <div class="thumb">
+          <img src="bunka-sleeve.svg?v=2" alt="셋인 반소매 도면" onerror="this.classList.add('error')">
+          <div class="fallback" aria-hidden="true">도면을 불러올 수 없습니다</div>
+        </div>
+        <div class="body">
+          <div class="t">소매 · 66호</div>
+          <div class="d">앞뒤 암홀을 참조해 소매산 폭을 역산</div>
+        </div>
+      </a>
+
+      <a class="card" href="bunka-sleeve-88.svg" aria-label="셋인 반소매 88호 도면 보기">
+        <div class="thumb">
+          <img src="bunka-sleeve-88.svg?v=2" alt="셋인 반소매 88호 도면" onerror="this.classList.add('error')">
+          <div class="fallback" aria-hidden="true">도면을 불러올 수 없습니다</div>
+        </div>
+        <div class="body">
+          <div class="t">소매 · 88호</div>
+          <div class="d">--set B=98 — 몸판 암홀이 커지자 소매가 따라옴</div>
+        </div>
+      </a>
+
+      <a class="card" href="scan025-front.svg" aria-label="무다트 민소매 오버블라우스 앞판 도면 보기">
+        <div class="thumb">
+          <img src="scan025-front.svg?v=3" alt="무다트 민소매 앞판 도면" onerror="this.classList.add('error')">
+          <div class="fallback" aria-hidden="true">도면을 불러올 수 없습니다</div>
+        </div>
+        <div class="body">
+          <div class="t">무다트 민소매 · 앞판</div>
+          <div class="d">교재 도해 전사 · 민소매 전용 진동</div>
+        </div>
+      </a>
+
+      <a class="card" href="scan025-back.svg" aria-label="무다트 민소매 오버블라우스 뒤판 도면 보기">
+        <div class="thumb">
+          <img src="scan025-back.svg?v=3" alt="무다트 민소매 뒤판 도면" onerror="this.classList.add('error')">
+          <div class="fallback" aria-hidden="true">도면을 불러올 수 없습니다</div>
+        </div>
+        <div class="body">
+          <div class="t">무다트 민소매 · 뒤판</div>
+          <div class="d">교재 도해 전사</div>
+        </div>
+      </a>
+    </div>
+
+    <h2>겹쳐보기 (검증 루프의 눈)</h2>
+    <ul class="files">
+      <li>
+        <a href="scan026.overlay.html" aria-label="반소매 원형을 교재 스캔 위에 겹쳐 보기">
+          <div>scan026.overlay.html</div>
+          <div class="d"><strong>실제 교재 스캔</strong> 위에 반소매 원형을 얹어 비교</div>
+        </a>
+      </li>
+      <li>
+        <a href="bunka-front.overlay.html" aria-label="겹쳐보기 도구 열기">
+          <div>bunka-front.overlay.html</div>
+          <div class="d">데모(엔진이 만든 SVG를 배경으로 씀) · 2점 배율 맞추기 · 레이어 토글</div>
+        </a>
+      </li>
+    </ul>
+
+    <h2>DXF (내려받아 LibreCAD·CAM 에서 열기)</h2>
+    <ul class="files">
+      <li>
+        <a href="bunka-front.dxf" download aria-label="앞판 66호 DXF 파일 다운로드 (R12 형식)">
+          <div>bunka-front.dxf</div>
+          <div class="d">앞판 66호 · R12</div>
+        </a>
+      </li>
+      <li>
+        <a href="bunka-back.dxf" download aria-label="뒤판 66호 DXF 파일 다운로드 (R12 형식)">
+          <div>bunka-back.dxf</div>
+          <div class="d">뒤판 66호 · R12</div>
+        </a>
+      </li>
+      <li>
+        <a href="bunka-front-44.dxf" download aria-label="앞판 44호 DXF 파일 다운로드">
+          <div>bunka-front-44.dxf</div>
+          <div class="d">앞판 44호</div>
+        </a>
+      </li>
+      <li>
+        <a href="bunka-front-88.dxf" download aria-label="앞판 88호 DXF 파일 다운로드">
+          <div>bunka-front-88.dxf</div>
+          <div class="d">앞판 88호</div>
+        </a>
+      </li>
+      <li>
+        <a href="scan025-front.dxf" download aria-label="무다트 민소매 앞판 DXF 다운로드">
+          <div>scan025-front.dxf</div>
+          <div class="d">무다트 민소매 앞판</div>
+        </a>
+      </li>
+      <li>
+        <a href="scan025-back.dxf" download aria-label="무다트 민소매 뒤판 DXF 다운로드">
+          <div>scan025-back.dxf</div>
+          <div class="d">무다트 민소매 뒤판</div>
+        </a>
+      </li>
+      <li>
+        <a href="bunka-sleeve.dxf" download aria-label="소매 DXF 파일 다운로드">
+          <div>bunka-sleeve.dxf</div>
+          <div class="d">셋인 반소매 66호</div>
+        </a>
+      </li>
+    </ul>
+
+    <h2>소스</h2>
+    <ul class="files">
+      <li>
+        <a href="../README.md" aria-label="DSL 레퍼런스 문서 열기">
+          <div>README.md</div>
+          <div class="d">DSL 레퍼런스</div>
+        </a>
+      </li>
+      <li>
+        <a href="../examples/bunka-front.draft.json" aria-label="앞판 DSL 소스 파일 열기">
+          <div>bunka-front.draft.json</div>
+          <div class="d">앞판 DSL — 계산식이 그대로 들어 있다</div>
+        </a>
+      </li>
+      <li>
+        <a href="../examples/bunka-back.draft.json" aria-label="뒤판 DSL 소스 파일 열기">
+          <div>bunka-back.draft.json</div>
+          <div class="d">뒤판 DSL</div>
+        </a>
+      </li>
+      <li>
+        <a href="../examples/scan025-front.draft.json" aria-label="무다트 민소매 앞판 DSL 열기">
+          <div>scan025-front.draft.json</div>
+          <div class="d">교재 전사 DSL — 추정한 값은 notes 에 적혀 있다</div>
+        </a>
+      </li>
+      <li>
+        <a href="../examples/bunka-sleeve.draft.json" aria-label="소매 DSL 소스 파일 열기">
+          <div>bunka-sleeve.draft.json</div>
+          <div class="d">소매 DSL — refs 로 몸판 암홀을 실측해 온다</div>
+        </a>
+      </li>
+      <li>
+        <a href="../" aria-label="리포지토리 전체 둘러보기">
+          <div>리포 전체 둘러보기</div>
+          <div class="d">lib/ · tools/</div>
+        </a>
+      </li>
+    </ul>
+
+    <div class="note">
+      겹쳐보기의 배경 사진(<code>_demo-scan.png</code>)은 <strong>엔진이 생성한 SVG를
+      이미지로 변환한 자체 참조 결과</strong>입니다. 완벽히 겹치는 것은 당연하며,
+      실제 검증은 교재 원본 스캔을 배경으로 실행해야 합니다.<br><br>
+      CLI 예시:
+      <code>node tools/overlay.mjs out/p128.draft.json 교재사진.png</code>
+    </div>
+  </div>
+
+  <script>
+    // SVG 로딩 실패 시 fallback 표시 (noscript 환경에서도 CSS만으로 작동하도록 이중 처리)
+    document.querySelectorAll('.card .thumb img').forEach(img => {
+      img.addEventListener('error', () => img.classList.add('error'));
+    });
+  </script>
+</body>
+</html>

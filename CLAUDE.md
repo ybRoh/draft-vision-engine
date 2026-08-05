@@ -37,6 +37,8 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 - `examples/` — 데모 픽스처 앞·뒤판 (아래 주의 참고), `examples/fewshot/` — 이미지 + 같은 이름 `.draft.json` 짝을 넣으면 `extract` 가 자동으로 실어 보낸다
 - `out/` — 렌더·추출 결과가 쌓이는 곳
 
+- **`web/index.html`** — 산출물을 브라우저로 훑는 페이지(손으로 쓴 것). `npm run page` 가 `out/` 으로 복사한다. `out/` 은 gitignore 라 거기 두면 지워질 때 같이 날아간다
+
 ## 불변 규칙
 
 - **좌표계: x 오른쪽 +, y 아래 +.** 화면·기존 패턴 앱들과 같다. `polar` 의 각도는 도(degree)이고 양수가 화면상 위쪽이라 **어깨경사는 음수각**이다
