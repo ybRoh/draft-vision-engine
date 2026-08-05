@@ -194,17 +194,25 @@ near(d.segments.find((s) => s.id === 'neck').length, 11.9247, '앞 목선 길이
       }
       return moved[moved.length - 1];
     };
-    for (const f of [1 / 3, 2 / 3]) {
-      const q = 지점(f);
+    /* 원형에서 얼마나 벌어졌는지를 **전 구간** 잰다. "1/3·2/3 두 점을 지나는가" 로만 보면
+     * 그 사이가 벌어져도 통과한다 — 실제로 두 점만 쓸 때 0.44cm 벌어졌다.
+     * 남는 차이는 끝 접선을 고친 자리에 몰려 있어야 하며, 그건 의도한 것이다. */
+    const 거리 = (pts, q) => {
       let bd = Infinity;
-      for (let i = 1; i < ah.pts.length; i++) {
-        const [x1, y1] = ah.pts[i - 1], [x2, y2] = ah.pts[i];
+      for (let i = 1; i < pts.length; i++) {
+        const [x1, y1] = pts[i - 1], [x2, y2] = pts[i];
         const dx = x2 - x1, dy = y2 - y1, L2 = dx * dx + dy * dy;
         const t = L2 > 1e-18 ? Math.max(0, Math.min(1, ((q[0] - x1) * dx + (q[1] - y1) * dy) / L2)) : 0;
         bd = Math.min(bd, Math.hypot(q[0] - (x1 + dx * t), q[1] - (y1 + dy * t)));
       }
-      if (bd > 0.01) bad(`진동이 원형의 ${f === 1 / 3 ? '1/3' : '2/3'} 지점을 안 지난다 (${bd.toFixed(3)}cm 벗어남)`);
-    }
+      return bd;
+    };
+    let 최대 = 0;
+    for (const q of moved) 최대 = Math.max(최대, 거리(ah.pts, q));
+    if (최대 > 0.4) bad(`진동이 옮긴 원형에서 ${최대.toFixed(3)}cm 벌어졌다 (0.4 이내여야 원형 성격이 남는다)`);
+    // 아예 붙어 있으면 끝 바로잡기를 안 한 것이다 — 그러면 각이 진 채로 통과한다
+    if (최대 < 0.01) bad(`진동이 옮긴 원형과 사실상 같다 (${최대.toFixed(4)}) — 끝 바로잡기를 안 했나`);
+
     if (!(ah.derived.trued)) bad('진동이 끝 바로잡기(true up)를 안 했다');
     if (!(ah.derived.scale > 1)) bad(`진동 배율이 ${ah.derived.scale} 다 (원형보다 커져야 한다 — 어깨가 좁아지고 겨드랑이 올라갔으므로)`);
   }
