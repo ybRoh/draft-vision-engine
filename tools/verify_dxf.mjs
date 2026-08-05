@@ -68,6 +68,53 @@ for (const key of ['cut', 'guide', 'fold', 'dart']) {
   if (!used.has(DXF_LAYER[key])) bad(`레이어 '${DXF_LAYER[key]}' 이 도면에 하나도 안 쓰였다 (예제가 바뀐 것 아닌가)`);
 }
 
+/* ── 레이어가 참조하는 선종류가 전부 LTYPE 테이블에 있는가
+ *
+ * 파일 첫머리에 규칙으로 적어 두고도 정작 COMPARE 가 정의 없는 DASHED 를 참조하고 있었다.
+ * 위쪽 검사는 이름을 **하드코딩한 목록**으로만 봐서 이걸 놓쳤다. 실제 참조에서 훑어야 한다. */
+{
+  const defined = new Set(p.ltypes.map((l) => l.name));
+  for (const l of p.layerDefs) {
+    if (l.ltype && !defined.has(l.ltype)) {
+      bad(`레이어 '${l.name}' 이 선종류 '${l.ltype}' 을 참조하는데 LTYPE 테이블에 없다`
+        + ` — 리더가 파일을 거부한다 (정의된 것: ${[...defined].join(', ')})`);
+    }
+  }
+}
+
+/* ── ACI 7 금지
+ *
+ * 7 은 "검정 또는 흰색" 이라는 뜻이고, 그 자동 대비는 AutoCAD 계열만 구현한다.
+ * FreeCAD 는 7 을 흰색으로 가져오므로 밝은 배경에서 선이 통째로 사라진다
+ * (맥에서는 열리는데 윈도우 FreeCAD 에서 선이 안 보이던 원인). 검정은 250 으로 쓴다. */
+for (const l of p.layerDefs) {
+  if (l.color === 7) {
+    bad(`레이어 '${l.name}' 의 색이 ACI 7 이다 — 배경에 따라 흰색으로 나와 선이 안 보인다. 검정은 250`);
+  }
+}
+
+/* ── 섹션 구성 — BLOCKS 를 빼먹으면 ENTITIES 를 못 찾고 빈 도면으로 여는 리더가 있다 */
+{
+  const want = ['HEADER', 'TABLES', 'BLOCKS', 'ENTITIES'];
+  if (p.sections.join(',') !== want.join(',')) {
+    bad(`섹션 구성이 ${p.sections.join(' → ') || '(없음)'} 이다 — R12 는 ${want.join(' → ')} 여야 한다`);
+  }
+}
+
+/* ── AC1009 에 R2000+ 그룹코드가 섞이지 않았는가
+ *
+ * 370(선굵기)·420(트루컬러)·390 등은 R2000 부터 생긴 코드다. R12 선언 파일에 넣으면
+ * 규격 위반이고, 테이블 항목 안의 모르는 코드에서 파싱을 접는 리더가 있다. */
+for (const c of ['370', '420', '390', '100']) {
+  if (p.codes.has(c)) bad(`AC1009 파일에 R2000+ 그룹코드 ${c} 가 들어 있다`);
+}
+
+/* ── VERTEX 는 전부 70 을 달고 나가야 한다 (없으면 정점으로 안 쳐 주는 엄격한 리더가 있다) */
+{
+  const missing = p.vertices.filter((v) => !v.has70).length;
+  if (missing) bad(`VERTEX ${missing}개가 그룹코드 70 없이 나갔다 (전체 ${p.vertices.length})`);
+}
+
 // ── 엔티티 개수
 const nPoly = p.entities.filter((e) => e.type === 'POLYLINE').length;
 /* 치수선 하나가 POLYLINE 3개를 만든다 — 치수선 본체 + 완성선까지 이어 주는 보조선 둘. */
