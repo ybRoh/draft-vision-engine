@@ -16,7 +16,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 - **`schema.mjs`** — DSL(`draft-spec v1`) 정의 한 곳. `extract` 의 structured output 스키마이자 `validate` 의 검사 대상. `LAYER_LIST` 도 여기서 나간다
 - **`draft.mjs`** — 엔진의 심장. DSL → 좌표. 점 위상정렬 · `resolve(spec, overrides)` · `DraftError`
 - **`project.mjs`** — `loadDraft(파일, 덮어쓰기)`. refs 를 따라 다른 조각까지 읽고 풀어 준다. 파일 IO 는 전부 여기 (resolve 는 순수 함수로 둔다)
-- **`curve.mjs`** — Freesewing(Brian block) through 곡선 · **제도법 곡선 `fsNeck`·`fsArmhole`·`bunkaSleeveCap`** · 베지어 길이(`segsLen`) · 폴리라인 길이(`polyLen`) · 직선 교점(`lineIntersect`). 벡터 헬퍼 `V`
+- **`curve.mjs`** — Freesewing(Brian block) through 곡선 · **제도법 곡선 `fsNeck`·`fsArmhole`·`sleevelessArmhole`·`bunkaSleeveCap`** · 베지어 길이(`segsLen`) · 폴리라인 길이(`polyLen`) · 직선 교점(`lineIntersect`). 벡터 헬퍼 `V`
 - **`svg.mjs`** — 도형 → SVG. cm 좌표 그대로 + `viewBox`, 1cm 모눈, 5cm 자
 - **`dxf.mjs`** — 도형 → DXF R12. `toDXF(drawing, {scale, textHeight, labels, title})` · 검증용 되읽기 `parseDXF` · 논리 레이어 → DXF 레이어 이름표 `DXF_LAYER` · `hasNonAscii`
 - **`validate.mjs`** — 구조(스키마) + 의미(참조 무결성 · **계산식**) 검사. 오류 문자열 배열을 돌려준다
@@ -63,6 +63,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 - **`URL.pathname` 을 파일 경로로 쓰지 말 것** — 리포 경로에 한글이 있어 퍼센트 인코딩된다. `fileURLToPath()` 를 쓴다 (예전에 few-shot 을 통째로 무력화한 함정)
 - **construction 레이어는 화면 액자(`viewBbox`)를 넓히지 못한다** — 보조선은 교점을 잡으려고 아무 데나 길게 긋는 것이라, 액자에 넣으면 정작 조각이 작아진다
 - **목선·암홀은 `fsNeck`·`fsArmhole` 로만 그린다** — `~/.claude/skills/pattern-draft-app/references/engine.js` 의 검증된 구현을 옮긴 것이다. 기존 패턴 앱들과 같은 곡선이 나와야 하므로 **핸들 수식을 임의로 다듬지 말 것.** 고칠 일이 생기면 스킬 쪽과 같이 고친다
+- **민소매 진동은 `armhole_sleeveless` 로 그린다** — 셋인(`armhole`)을 민소매에 쓰면 어깨끈이 좁을수록 진동이 바깥으로 부푼다. 민소매는 **전 구간 오목**이어야 하고, 파는 방향은 **수평**(품선에서 가로로 잰다). `verify_draft` 가 현 바깥으로 나간 점이 있는지 센다
 - **목선은 옆목점에, 암홀은 어깨끝점에 어깨선과 직각으로 닿아야 한다** — 어깨를 박았을 때 목둘레·진동에 각이 지지 않게 하는 조건이다. `verify_draft` 가 실제로 잰다. through 곡선으로 대체하면 이 조건이 깨진다
 - **암홀 겨드랑 쪽은 오목해야 한다** — 오목점이 현 바깥으로 나가면 단순 볼록 돔이 되어 팔이 안 올라간다. 이것도 검증이 잡는다
 - **`fsArmhole` 의 좌우는 입력에서 알아낸다**(`bottom[0] < pitchX`) — 전역 CF 를 두지 않는다. 셈이 전부 평행이동 불변이라 뒤집는 축은 x=0 으로 충분하다

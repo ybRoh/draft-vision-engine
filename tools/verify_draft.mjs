@@ -117,6 +117,60 @@ near(d.segments.find((s) => s.id === 'neck').length, 11.9247, '앞 목선 길이
   }
 }
 
+/* ── 민소매 진동 (armhole_sleeveless)
+ *
+ * 셋인 진동과 **모양이 달라야** 한다는 게 이 kind 를 따로 만든 이유다.
+ * 셋인은 어깨 쪽이 현 위로 볼록한 S자인데, 민소매가 그러면 좁은 어깨끈에서 진동이
+ * 바깥으로 부풀어 못 쓴다. 그래서 "전 구간 오목" 을 실제로 잰다. */
+{
+  const 민 = resolve(JSON.parse(fs.readFileSync(new URL('../examples/scan025-front.draft.json', import.meta.url))));
+  const ah = 민.segments.find((s) => s.id === 'armhole');
+  if (ah.kind !== 'armhole_sleeveless') bad(`scan025 앞판 진동 kind 가 ${ah.kind} 다 (기대 armhole_sleeveless)`);
+  const SP = [민.points.SP.x, 민.points.SP.y];
+  const UA = [민.points.UA.x, 민.points.UA.y];
+  const SNP = [민.points.SNP.x, 민.points.SNP.y];
+  const 단위 = (v) => { const l = Math.hypot(v[0], v[1]); return [v[0] / l, v[1] / l]; };
+
+  // (1) 어깨끝에서 어깨선과 직각으로 출발 — 목선·어깨와 이어지는 곳에 각이 지지 않게
+  {
+    const g = ah.segs[0];
+    const t = 단위([g.c1[0] - g.p0[0], g.c1[1] - g.p0[1]]);
+    const sh = 단위([SP[0] - SNP[0], SP[1] - SNP[1]]);
+    near(t[0] * sh[0] + t[1] * sh[1], 0, '민소매 진동이 SP 에서 어깨선과 직각', 1e-9);
+  }
+
+  // (2) 겨드랑에는 수평으로 도착 — 앞뒤판을 박았을 때 진동이 한 줄로 이어져야 한다
+  {
+    const g = ah.segs[ah.segs.length - 1];
+    const t = 단위([g.p1[0] - g.c2[0], g.p1[1] - g.c2[1]]);
+    near(t[1], 0, '민소매 진동이 겨드랑에 수평으로 도착', 1e-9);
+  }
+
+  /* (3) ★ 전 구간이 현보다 **안쪽**에 있어야 한다. 한 점이라도 바깥으로 나가면
+   *     셋인 진동처럼 부푼 것이다 — 이 kind 를 만든 이유가 사라진다. */
+  {
+    const ch = [UA[0] - SP[0], UA[1] - SP[1]], L = Math.hypot(ch[0], ch[1]);
+    const 안쪽부호 = Math.sign((ch[0] * (SNP[1] - SP[1]) - ch[1] * (SNP[0] - SP[0])));
+    let 최대 = 0, 바깥 = 0;
+    for (const p of ah.pts) {
+      const d = (ch[0] * (p[1] - SP[1]) - ch[1] * (p[0] - SP[0])) / L * 안쪽부호;
+      if (d < -1e-9) 바깥++;
+      if (d > 최대) 최대 = d;
+    }
+    if (바깥) bad(`민소매 진동이 현 바깥으로 나간 점이 ${바깥}개 (전 구간 오목이어야 한다)`);
+
+    /* (4) 제도점에서의 깊이가 도해값(AH_IN)과 정확히 같아야 한다.
+     *     "최대 깊이" 로 재면 안 된다 — 곡선은 제도점을 지나되 그 사이에서 조금 더 부푼다.
+     *     제도점 깊이는 정확히, 최대 깊이는 그보다 지나치지 않게(1.3배 이내) 본다. */
+    const sp2 = ah.derived.scoopPt;
+    // 제도점은 품 **높이** 에 있고, 현에서 **가로로** 도해값만큼 들어가 있어야 한다
+    near(sp2[1], 민.points.AH_P.y, '민소매 진동 제도점이 품 높이에 있다', 1e-9);
+    const 현x = SP[0] + ch[0] * ((sp2[1] - SP[1]) / ch[1]);
+    near(현x - sp2[0], 민.scope.AH_IN, '민소매 진동 제도점이 현에서 가로로 도해값만큼 들어감', 1e-9);
+    if (!(최대 <= 민.scope.AH_IN * 1.4)) bad(`민소매 진동이 도해값(${민.scope.AH_IN})보다 과하게 파였다: ${최대.toFixed(2)}`);
+  }
+}
+
 // ── 뒤어깨 늘림: hypot() 식이 실제로 SH_EASE 만큼 길게 만들었나
 const db = resolve(back);
 const shBack = db.segments.find((s) => s.id === 'shoulder').length;
