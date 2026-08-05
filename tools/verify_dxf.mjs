@@ -70,12 +70,17 @@ for (const key of ['cut', 'guide', 'fold', 'dart']) {
 
 // ── 엔티티 개수
 const nPoly = p.entities.filter((e) => e.type === 'POLYLINE').length;
-const wantPoly = d.segments.length + d.darts.length;
-if (nPoly !== wantPoly) bad(`POLYLINE ${nPoly}개 · 기대 ${wantPoly}개 (선 ${d.segments.length} + 다트 ${d.darts.length})`);
+/* 치수선 하나가 POLYLINE 3개를 만든다 — 치수선 본체 + 완성선까지 이어 주는 보조선 둘. */
+const nDim = (d.dims ?? []).length;
+const wantPoly = d.segments.length + d.darts.length + nDim * 3;
+if (nPoly !== wantPoly) {
+  bad(`POLYLINE ${nPoly}개 · 기대 ${wantPoly}개 (선 ${d.segments.length} + 다트 ${d.darts.length} + 치수선 ${nDim}×3)`);
+}
 const nCircle = p.entities.filter((e) => e.type === 'CIRCLE').length;
 if (nCircle !== d.notches.length) bad(`너치 CIRCLE ${nCircle}개 · 기대 ${d.notches.length}개`);
 const nText = p.entities.filter((e) => e.type === 'TEXT').length;
-if (nText !== Object.keys(d.points).length + 1) bad(`TEXT ${nText}개 · 기대 ${Object.keys(d.points).length + 1}개 (점 이름 + 제목)`);
+const wantText = Object.keys(d.points).length + 1 + nDim;   // 점 이름 + 제목 + 치수 글자
+if (nText !== wantText) bad(`TEXT ${nText}개 · 기대 ${wantText}개 (점 이름 + 제목 + 치수 ${nDim})`);
 for (const e of p.entities.filter((x) => x.type === 'POLYLINE')) {
   if (!e.verts || e.verts < 2) bad(`POLYLINE(${e.layer}) 에 VERTEX 가 ${e.verts ?? 0}개뿐이다`);
 }
@@ -147,13 +152,17 @@ near(Math.max(...V.map((v) => v[1])), -dy0 * 10, 'VERTEX y 최대(= -그린범�
   if (!(mx.y >= -(d.bbox.y0 - 1.5) * 10 - 1e-6)) bad(`$EXTMAX.y(${mx.y}) 가 제목 TEXT 를 못 감싼다`);
 }
 
-// ── labels 를 끄면 점 이름 TEXT 가 빠져야 한다
-if (parseDXF(txtPlain).entities.filter((e) => e.type === 'TEXT').length !== 1) {
-  bad('--labels 없이도 점 이름이 나간다 (공장 전달용에 잡음)');
+/* ── labels 를 끄면 **점 이름** TEXT 가 빠져야 한다.
+ * 치수 글자는 DIM 레이어라 labels 와 무관하게 남는다 — CAD 에서 고칠 때 공식을 봐야 하기
+ * 때문이다. 그래서 DIM 레이어를 뺀 나머지만 센다. */
+{
+  const t = parseDXF(txtPlain).entities.filter((e) => e.type === 'TEXT' && e.layer !== DXF_LAYER.dim);
+  if (t.length !== 1) bad(`--labels 없이도 점 이름이 나간다 (공장 전달용에 잡음) — DIM 밖 TEXT ${t.length}개`);
 }
-// title 을 끄면 TEXT 가 아예 없어야 한다 (한글 제목을 못 읽는 CAM 용 탈출구)
-if (parseDXF(toDXF(d, { labels: false, title: false })).entities.some((e) => e.type === 'TEXT')) {
-  bad('title:false 인데도 TEXT 가 나간다');
+// title 을 끄면 DIM 밖 TEXT 가 아예 없어야 한다 (한글 제목을 못 읽는 CAM 용 탈출구)
+if (parseDXF(toDXF(d, { labels: false, title: false })).entities
+      .some((e) => e.type === 'TEXT' && e.layer !== DXF_LAYER.dim)) {
+  bad('title:false 인데도 제목·점 이름 TEXT 가 나간다');
 }
 
 // ── parseDXF 가 SEQEND 를 넘어 정점을 주워 담지 않는지
