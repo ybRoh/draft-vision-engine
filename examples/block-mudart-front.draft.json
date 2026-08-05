@@ -287,7 +287,8 @@
       "layer": "cut",
       "center": "FNP",
       "snp": "SNP",
-      "shoulder": "SP"
+      "shoulder": "SP",
+      "via": ""
     },
     {
       "id": "shoulder",

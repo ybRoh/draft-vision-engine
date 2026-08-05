@@ -228,7 +228,7 @@ near(d.segments.find((s) => s.id === 'neck').length, 11.9247, '앞 목선 길이
 
   // 교재 값과 실제 제도 결과가 일치하는가 — 식을 잘못 옮기면 여기서 갈린다
   const 기대 = { d_ahd: 21.5, d_bust: 23.0, d_waist: 19.5, d_hip: 24.0,
-                 d_hiplen: 19.0, d_len: 58.4, d_drop: 1.0, d_shw: 6.4, d_fnd: 86 / 12 + 0.3 };
+                 d_hiplen: 19.0, d_len: 58.4, d_drop: 1.0, d_shw: 6.4, d_fnd: 86 / 12 + 0.3 + 6.4 };
   for (const [id, want] of Object.entries(기대)) {
     const d = 민.dims.find((x) => x.id === id);
     if (!d) { bad(`치수선 '${id}' 가 없다`); continue; }

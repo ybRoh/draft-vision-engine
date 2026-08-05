@@ -327,7 +327,8 @@
       "layer": "cut",
       "center": "CNP",
       "snp": "SNP",
-      "shoulder": "SP"
+      "shoulder": "SP",
+      "via": ""
     },
     {
       "id": "armhole",
