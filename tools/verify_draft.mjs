@@ -266,7 +266,7 @@ near(d.segments.find((s) => s.id === 'neck').length, 11.9247, '앞 목선 길이
  * "어깨너비/2 = 19.83" 처럼 식과 값이 어긋난다. 실제로 그랬다 — 그래서 여기서 못 박는다. */
 for (const [파일, 기대] of [
   ['block-mudart-front.draft.json', { d_nw: 6.6, d_fnd: 86 / 12 + 0.3, d_ahd: 21.5, d_bust: 23.0, d_len: 38, d_sw: 19.5 }],
-  ['block-mudart-back.draft.json', { d_nw: 6.6, d_bnd: 2.2, d_ahd: 21.5, d_bust: 23.4, d_len: 38, d_sw: 19.5 }],
+  ['block-mudart-back.draft.json', { d_nw: 6.6, d_bnd: 2.2, d_ahd: 21.5, d_bust: 23.4, d_len: 38 }],
 ]) {
   const d = 열기(파일);
   if (!d.dims.length) bad(`${파일} 에 치수선이 없다`);
@@ -279,6 +279,30 @@ for (const [파일, 기대] of [
   const side = d.segments.find((v) => v.id === 'side');
   near(side.pts[0][0], side.pts[side.pts.length - 1][0], `${파일} 옆선이 수직 (무다트)`, 1e-12);
   if (d.darts.length) bad(`${파일}: 무다트 원형인데 다트가 ${d.darts.length}개 있다`);
+}
+
+/* ── 앞뒤판이 실제로 맞물리는가 (봉제 조건)
+ *
+ * 어깨선·옆선은 앞뒤를 박아 붙이는 선이다. 길이가 안 맞으면 못 꿰맨다.
+ * 뒤 어깨는 앞보다 **이세만큼 길어야** 한다 — 견갑골 위로 넣는 여유다.
+ * 뒤 경사만 완만하게 주고 이세를 빼먹으면 뒤가 오히려 짧아진다(실제로 0.14cm 짧았다). */
+for (const [이름, 앞, 뒤, 이세] of [
+  ['무다트 원형', 'block-mudart-front.draft.json', 'block-mudart-back.draft.json', 0.7],
+  ['scan025', 'scan025-front.draft.json', 'scan025-back.draft.json', 0],
+]) {
+  const F = 열기(앞), B = 열기(뒤);
+  const len = (d, id) => d.segments.find((s) => s.id === id).length;
+  near(len(B, 'shoulder') - len(F, 'shoulder'), 이세, `${이름}: 뒤 어깨 = 앞 어깨 + 이세 ${이세}`, 0.005);
+  const 옆차 = Math.abs(len(B, 'side') - len(F, 'side'));
+  if (옆차 > 0.15) bad(`${이름}: 앞뒤 옆선 길이가 ${옆차.toFixed(2)}cm 다르다 — 박을 수 없다`);
+}
+
+// 사이즈를 바꿔도 어깨 이세가 유지되는가 (참조가 끊기면 여기서 갈린다)
+for (const B of [78, 98]) {
+  const f = loadDraft(예제경로('block-mudart-front.draft.json'), { B }).drawing;
+  const b = loadDraft(예제경로('block-mudart-back.draft.json'), { B }).drawing;
+  const len = (d, id) => d.segments.find((s) => s.id === id).length;
+  near(len(b, 'shoulder') - len(f, 'shoulder'), 0.7, `B=${B} 에서도 뒤 어깨 이세 0.7`, 0.005);
 }
 
 // 소매산 높이 치수선이 소매길이를 재고 있지 않은지 (실제로 그랬다)
