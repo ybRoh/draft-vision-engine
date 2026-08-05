@@ -481,7 +481,7 @@ DSL 에서 고를 수 없지만 DXF 파일에는 더 있다. `darts` 는 `layer`
 ```json
 "compare": [
   { "id": "block", "desc": "문화식 상의 원형 앞판과 비교",
-    "draft": "bunka-front.draft.json", "dx": 0, "dy": 0 }
+    "draft": "block-mudart-front.draft.json", "dx": 0, "dy": 0 }
 ]
 ```
 

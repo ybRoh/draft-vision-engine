@@ -1,0 +1,350 @@
+{
+  "version": 1,
+  "name": "무다트 원형 뒤판",
+  "source": {
+    "book": "파생 — 교재 원본 페이지 없음",
+    "page": "미상"
+  },
+  "units": "cm",
+  "measures": [
+    {
+      "id": "B",
+      "desc": "가슴둘레",
+      "value": 86
+    },
+    {
+      "id": "W",
+      "desc": "허리둘레",
+      "value": 68
+    },
+    {
+      "id": "SW",
+      "desc": "어깨너비",
+      "value": 39
+    },
+    {
+      "id": "BACK_LEN",
+      "desc": "등길이 (옆목 수평선 → 허리선)",
+      "value": 38
+    }
+  ],
+  "params": [
+    {
+      "id": "NW",
+      "desc": "목너비 — 6.6",
+      "value": 6.6
+    },
+    {
+      "id": "NECK_UP",
+      "desc": "뒤 옆목 올림 — 1",
+      "value": 1
+    },
+    {
+      "id": "BND",
+      "desc": "뒤목깊이 (목너비/3)",
+      "value": 2.2
+    },
+    {
+      "id": "SH_ANGLE",
+      "desc": "어깨 경사(도) — 뒤는 앞보다 완만",
+      "value": 16
+    },
+    {
+      "id": "BW_ADD",
+      "desc": "뒤품선 더하는 값 (B/6 + 값)",
+      "value": 3.5
+    },
+    {
+      "id": "BUST_EASE",
+      "desc": "뒤 가슴 여유분 — 1.9",
+      "value": 1.9
+    }
+  ],
+  "refs": [],
+  "compare": [],
+  "dims": [
+    {
+      "id": "d_nw",
+      "desc": "목너비",
+      "a": "A",
+      "b": "SNP",
+      "label": "6.6",
+      "offset": 1.2
+    },
+    {
+      "id": "d_bnd",
+      "desc": "뒤목깊이",
+      "a": "A",
+      "b": "CNP",
+      "label": "목너비/3",
+      "offset": -1.5
+    },
+    {
+      "id": "d_ahd",
+      "desc": "진동깊이",
+      "a": "A",
+      "b": "BL_C",
+      "label": "B/4",
+      "offset": -3.4
+    },
+    {
+      "id": "d_bust",
+      "desc": "뒤 가슴 반폭",
+      "a": "BL_C",
+      "b": "BL_S",
+      "label": "B/4+여유분 1.9",
+      "offset": 2.2
+    },
+    {
+      "id": "d_len",
+      "desc": "등길이",
+      "a": "A",
+      "b": "WL_C",
+      "label": "등길이",
+      "offset": -5.4
+    },
+    {
+      "id": "d_sw",
+      "desc": "어깨너비의 반",
+      "a": "A",
+      "b": "SP",
+      "label": "어깨너비/2",
+      "offset": 1.4
+    }
+  ],
+  "points": [
+    {
+      "id": "A",
+      "desc": "뒤중심 × 옆목 수평선 (제도 원점)",
+      "kind": "xy",
+      "x": 0,
+      "y": 0
+    },
+    {
+      "id": "SNP",
+      "desc": "뒤 옆목점",
+      "kind": "xy",
+      "x": "NW",
+      "y": "-NECK_UP"
+    },
+    {
+      "id": "CNP",
+      "desc": "뒤목점 (옆목점보다 뒤목깊이만큼 아래)",
+      "kind": "xy",
+      "x": 0,
+      "y": "BND-NECK_UP"
+    },
+    {
+      "id": "SH_DIR",
+      "desc": "어깨 경사 방향점 (제도 보조)",
+      "kind": "polar",
+      "from": "SNP",
+      "angle": "-SH_ANGLE",
+      "dist": 20
+    },
+    {
+      "id": "SWL_T",
+      "desc": "어깨너비선 위 (제도 보조)",
+      "kind": "xy",
+      "x": "SW/2",
+      "y": -1
+    },
+    {
+      "id": "SWL_B",
+      "desc": "어깨너비선 아래 (제도 보조)",
+      "kind": "xy",
+      "x": "SW/2",
+      "y": 20
+    },
+    {
+      "id": "SP",
+      "desc": "어깨끝점 (어깨경사선 × 어깨너비선)",
+      "kind": "intersect",
+      "a1": "SNP",
+      "a2": "SH_DIR",
+      "b1": "SWL_T",
+      "b2": "SWL_B"
+    },
+    {
+      "id": "BL_C",
+      "desc": "앞중심 × 진동깊이선 (B/4)",
+      "kind": "xy",
+      "x": 0,
+      "y": "B/4"
+    },
+    {
+      "id": "BL_S",
+      "desc": "겨드랑점 (가슴선 옆끝)",
+      "kind": "xy",
+      "x": "B/4+BUST_EASE",
+      "y": "B/4"
+    },
+    {
+      "id": "BW_T",
+      "desc": "뒤품선 위 (제도 보조)",
+      "kind": "xy",
+      "x": "B/6+BW_ADD",
+      "y": -1
+    },
+    {
+      "id": "BW_B",
+      "desc": "뒤품선 아래",
+      "kind": "xy",
+      "x": "B/6+BW_ADD",
+      "y": "B/4"
+    },
+    {
+      "id": "AH_P",
+      "desc": "뒤품점 — 암홀은 x 만 쓴다",
+      "kind": "on",
+      "a": "BW_T",
+      "b": "BW_B",
+      "t": 0.65
+    },
+    {
+      "id": "WL_C",
+      "desc": "뒤중심 허리점",
+      "kind": "xy",
+      "x": 0,
+      "y": "BACK_LEN"
+    },
+    {
+      "id": "WL_S",
+      "desc": "옆선 허리점 — 무다트라 가슴폭 그대로 내려온다",
+      "kind": "xy",
+      "x": "B/4+BUST_EASE",
+      "y": "BACK_LEN"
+    }
+  ],
+  "segments": [
+    {
+      "id": "box",
+      "desc": "제도 기초 사각형",
+      "kind": "line",
+      "layer": "guide",
+      "pts": [
+        "A",
+        "BL_S",
+        "WL_S",
+        "WL_C"
+      ],
+      "closed": false
+    },
+    {
+      "id": "bust_line",
+      "desc": "진동깊이선 (B/4)",
+      "kind": "line",
+      "layer": "guide",
+      "pts": [
+        "BL_C",
+        "BL_S"
+      ],
+      "closed": false
+    },
+    {
+      "id": "bw_line",
+      "desc": "뒤품선",
+      "kind": "line",
+      "layer": "guide",
+      "pts": [
+        "BW_T",
+        "BW_B"
+      ],
+      "closed": false
+    },
+    {
+      "id": "sh_line",
+      "desc": "어깨 경사선 (제도 보조)",
+      "kind": "line",
+      "layer": "construction",
+      "pts": [
+        "SNP",
+        "SH_DIR"
+      ],
+      "closed": false
+    },
+    {
+      "id": "swl",
+      "desc": "어깨너비선 (제도 보조)",
+      "kind": "line",
+      "layer": "construction",
+      "pts": [
+        "SWL_T",
+        "SWL_B"
+      ],
+      "closed": false
+    },
+    {
+      "id": "neck",
+      "desc": "뒤목선",
+      "kind": "neck",
+      "layer": "cut",
+      "center": "CNP",
+      "snp": "SNP",
+      "shoulder": "SP"
+    },
+    {
+      "id": "shoulder",
+      "desc": "어깨선",
+      "kind": "line",
+      "layer": "cut",
+      "pts": [
+        "SNP",
+        "SP"
+      ],
+      "closed": false
+    },
+    {
+      "id": "armhole",
+      "desc": "뒤 진동 (셋인)",
+      "kind": "armhole",
+      "layer": "cut",
+      "shoulder": "SP",
+      "neck": "SNP",
+      "pitch": "AH_P",
+      "bottom": "BL_S"
+    },
+    {
+      "id": "cb",
+      "desc": "뒤중심 (골)",
+      "kind": "line",
+      "layer": "fold",
+      "pts": [
+        "CNP",
+        "WL_C"
+      ],
+      "closed": false
+    },
+    {
+      "id": "side",
+      "desc": "옆선 — 무다트라 수직",
+      "kind": "line",
+      "layer": "cut",
+      "pts": [
+        "BL_S",
+        "WL_S"
+      ],
+      "closed": false
+    },
+    {
+      "id": "waist",
+      "desc": "허리선",
+      "kind": "line",
+      "layer": "cut",
+      "pts": [
+        "WL_C",
+        "WL_S"
+      ],
+      "closed": false
+    }
+  ],
+  "darts": [],
+  "notches": [],
+  "notes": [
+    "★ 교재 원본 페이지를 전사한 것이 아니다. scan025 가 표제에 '무다트 원형 참조' 라고 적어 두었는데 그 원형 페이지가 없어, scan025 와 같은 기초 공식을 쓰는 원형으로 파생시켰다.",
+    "공유하는 기초 공식: 목너비 6.6 · 뒤 옆목 올림 1 · 진동깊이 B/4 · 뒤 가슴 반폭 B/4+여유분 1.9.",
+    "무다트 = 다트가 없다. 옆선이 가슴폭 그대로 수직으로 내려온다(박스형).",
+    "뒤목깊이 2.2(목너비/3)·어깨 경사 16도·뒤품선 B/6+3.5 는 도해 근거가 없는 추정값이다.",
+    "진동은 셋인용 armhole kind 다 — 원형은 소매가 붙는 것을 전제로 한다."
+  ]
+}

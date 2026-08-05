@@ -9,7 +9,7 @@
     "render": "node tools/render.mjs",
     "extract": "node tools/extract.mjs",
     "overlay": "node tools/overlay.mjs",
-    "demo": "node tools/render.mjs examples/bunka-front.draft.json && node tools/render.mjs examples/bunka-back.draft.json && node tools/render.mjs examples/bunka-sleeve.draft.json"
+    "demo": "node tools/render.mjs examples/bunka-front.draft.json && node tools/render.mjs examples/bunka-back.draft.json && node tools/render.mjs examples/bunka-sleeve.draft.json && node tools/render.mjs examples/block-mudart-front.draft.json && node tools/render.mjs examples/block-mudart-back.draft.json && node tools/render.mjs examples/scan025-front.draft.json && node tools/render.mjs examples/scan025-back.draft.json"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.115.0"
