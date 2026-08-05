@@ -8,7 +8,7 @@
  */
 import fs from 'node:fs';
 import { resolve } from '../lib/draft.mjs';
-import { toDXF, parseDXF, DXF_LAYER } from '../lib/dxf.mjs';
+import { toDXF, parseDXF, DXF_LAYER, ACI_RGB } from '../lib/dxf.mjs';
 
 let fail = 0;
 const bad = (m) => { console.error('✖ ' + m); fail++; };
@@ -82,14 +82,52 @@ for (const key of ['cut', 'guide', 'fold', 'dart']) {
   }
 }
 
-/* ── ACI 7 금지
+/* ── 모든 레이어 색이 **어두운 배경과 밝은 배경 양쪽**에서 보이는가
  *
- * 7 은 "검정 또는 흰색" 이라는 뜻이고, 그 자동 대비는 AutoCAD 계열만 구현한다.
- * FreeCAD 는 7 을 흰색으로 가져오므로 밝은 배경에서 선이 통째로 사라진다
- * (맥에서는 열리는데 윈도우 FreeCAD 에서 선이 안 보이던 원인). 검정은 250 으로 쓴다. */
-for (const l of p.layerDefs) {
-  if (l.color === 7) {
-    bad(`레이어 '${l.name}' 의 색이 ACI 7 이다 — 배경에 따라 흰색으로 나와 선이 안 보인다. 검정은 250`);
+ * DXF 에는 배경색이 없다. 오토캐드 2024 는 어두운 배경, FreeCAD 는 밝은 배경이 기본이라
+ * 한쪽만 보고 색을 고르면 반대쪽에서 선이 통째로 사라진다. 실제로 두 번 깨졌다 —
+ * ACI 7(FreeCAD 에서 흰색)로 한 번, ACI 250(순수 검정)·ACI 5(파랑)로 또 한 번.
+ * "7 을 쓰지 마라" 같은 개별 금지로는 다음 실수를 못 막는다. 대비를 직접 잰다. */
+{
+  const DARK = [33, 40, 48], LIGHT = [255, 255, 255];
+  const lum = ([r, g, b]) => {
+    const f = (v) => (v / 255 <= 0.03928 ? v / 255 / 12.92 : ((v / 255 + 0.055) / 1.055) ** 2.4);
+    return 0.2126 * f(r) + 0.7152 * f(g) + 0.0722 * f(b);
+  };
+  const contrast = (a, b) => {
+    const [hi, lo] = [lum(a), lum(b)].sort((x, y) => y - x);
+    return (hi + 0.05) / (lo + 0.05);
+  };
+  const MIN = 2.5;
+  for (const l of p.layerDefs) {
+    const rgb = ACI_RGB[l.color];
+    if (!rgb) {
+      bad(`레이어 '${l.name}' 이 ACI ${l.color} 를 쓰는데 ACI_RGB 표에 없다`
+        + ` — 대비를 잴 수 없는 색은 쓰지 않는다 (쓸 수 있는 것: ${Object.keys(ACI_RGB).join(', ')})`);
+      continue;
+    }
+    const d = contrast(rgb, DARK), b2 = contrast(rgb, LIGHT);
+    if (Math.min(d, b2) < MIN) {
+      bad(`레이어 '${l.name}' 의 색 ACI ${l.color} 는 ${d < b2 ? '어두운' : '밝은'} 배경에서 대비가`
+        + ` ${Math.min(d, b2).toFixed(2)} 뿐이다 (최소 ${MIN}) — 그 배경에서 선이 안 보인다`);
+    }
+  }
+}
+
+/* ── VPORT: 열었을 때의 첫 화면이 도형을 담고 있는가
+ *
+ * 없으면 리더가 기본 화면을 쓰고, 우리 도형(y 가 -380 까지)이 그 밖에 있어
+ * "열리긴 하는데 화면이 텅 빈" 상태가 된다. 오토캐드 2024 에서 그랬다. */
+{
+  if (!p.vports.length) bad('VPORT 테이블이 없다 — 열었을 때 화면이 도형을 안 잡아 텅 비어 보인다');
+  for (const v of p.vports) {
+    const ext = p.header;
+    const cx = (ext.extMin[0] + ext.extMax[0]) / 2, cy = (ext.extMin[1] + ext.extMax[1]) / 2;
+    const h = ext.extMax[1] - ext.extMin[1];
+    // 좌표는 소수 3자리로 반올림해 쓴다 — 1e-6 은 파일이 담을 수 있는 정밀도보다 촘촘하다
+    near(v.center[0], cx, 'VPORT 가 도형 가로 한가운데를 보고 있다', 0.01);
+    near(v.center[1], cy, 'VPORT 가 도형 세로 한가운데를 보고 있다', 0.01);
+    if (!(v.height >= h)) bad(`VPORT 높이 ${v.height} 가 도형 높이 ${h} 보다 작다 — 위아래가 잘린다`);
   }
 }
 
