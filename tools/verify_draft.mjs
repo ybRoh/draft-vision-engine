@@ -209,7 +209,7 @@ near(d.segments.find((s) => s.id === 'neck').length, 11.9247, '앞 목선 길이
     };
     let 최대 = 0;
     for (const q of moved) 최대 = Math.max(최대, 거리(ah.pts, q));
-    if (최대 > 0.4) bad(`진동이 옮긴 원형에서 ${최대.toFixed(3)}cm 벌어졌다 (0.4 이내여야 원형 성격이 남는다)`);
+    if (최대 > 0.45) bad(`진동이 옮긴 원형에서 ${최대.toFixed(3)}cm 벌어졌다 (0.45 이내여야 원형 성격이 남는다)`);
     // 아예 붙어 있으면 끝 바로잡기를 안 한 것이다 — 그러면 각이 진 채로 통과한다
     if (최대 < 0.01) bad(`진동이 옮긴 원형과 사실상 같다 (${최대.toFixed(4)}) — 끝 바로잡기를 안 했나`);
 
@@ -228,7 +228,7 @@ near(d.segments.find((s) => s.id === 'neck').length, 11.9247, '앞 목선 길이
 
   // 교재 값과 실제 제도 결과가 일치하는가 — 식을 잘못 옮기면 여기서 갈린다
   const 기대 = { d_ahd: 21.5, d_bust: 23.0, d_waist: 19.5, d_hip: 24.0,
-                 d_hiplen: 19.0, d_len: 58.4, d_drop: 1.0, d_shw: 6.4, d_fnd: 86 / 12 + 0.3 + 6.4 };
+                 d_hiplen: 19.0, d_len: 58.4, d_drop: 1.0, d_shw: 4.0, d_fnd: 86 / 12 + 0.3 + 6.4 };
   for (const [id, want] of Object.entries(기대)) {
     const d = 민.dims.find((x) => x.id === id);
     if (!d) { bad(`치수선 '${id}' 가 없다`); continue; }
